@@ -9,3 +9,9 @@ echo "SHOW DATABASEs;"                | mysql -u root -p shop;
 echo "DESCRIBE shop.people;"          | mysql -u root -p shop;
 echo "SHOW CREATE TABLE shop.people;" | mysql -u root -p shop;
 echo "DELETE FROM test;"              | mysql -u root -p shop;
+
+==============================
+postgres:
+CREATE DATABASE IF NOT EXISTS shop;
+\c;
+\d;
