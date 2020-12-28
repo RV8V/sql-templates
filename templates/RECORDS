@@ -1,0 +1,11 @@
+==============================
+dump:
+cat templates/initial.sql             | mysql --user root --password;
+
+==============================
+echo:
+echo "SELECT * FROM shop.people;"     | mysql -u root -p password shop;
+echo "SHOW DATABASEs;"                | mysql -u root -p shop;
+echo "DESCRIBE shop.people;"          | mysql -u root -p shop;
+echo "SHOW CREATE TABLE shop.people;" | mysql -u root -p shop;
+echo "DELETE FROM test;"              | mysql -u root -p shop;
