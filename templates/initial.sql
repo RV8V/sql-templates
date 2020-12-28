@@ -103,3 +103,6 @@ SELECT * AS a, p.id AS i, s.title AS t FROM people AS p, shop AS s;
 SELECT COUNT(people.id) AS count, MIN(shop.price) AS min, AVG(shop.price) AS avg, SUM(people.id) AS sum FROM people, shop;
 SELECT UCASE(shop.title), LCASE(shop.title) FROM shop;
 SELECT price, COUNT(price) AS count FROM shop GROUP BY price HAVING COUNT(price) > 1;
+
+SELECT *, SUM(PostalCode) AS Sum FROM Customers
+SELECT * FROM Customers WHERE ContactName LIKE '_n%' LIMIT 2
