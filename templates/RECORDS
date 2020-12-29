@@ -1,4 +1,4 @@
-==============================
+==============================        ==============================
 dump:
 cat templates/initial.sql             | mysql --user root --password;
 
@@ -15,3 +15,2195 @@ postgres:
 CREATE DATABASE IF NOT EXISTS shop;
 \c;
 \d;
+
+==============================
+postgres-sql-docker:
+bash templates/bash-docker.sh
+docker exec -it ce bash
+psql -U postgres
+
+==============================        ==============================
+apt-get update && sudo !!
+apt-get install postgresql postgresql-contrib
+psql --version
+- sudo -iu postgres
+- psql / psql -U(--user) postgres
++ sudo --user postgres psql
+
+CREATE DATABASE mydb;
+\l;
+                              List of databases
+Name    |  Owner   | Encoding |  Collate   |   Ctype    |   Access privileges
+
+-----------+----------+----------+------------+------------+--------------------
+---
+gemstone  | postgres | UTF8     | en_US.utf8 | en_US.utf8 |
+mybd      | postgres | UTF8     | en_US.utf8 | en_US.utf8 |
+postgres  | postgres | UTF8     | en_US.utf8 | en_US.utf8 |
+template0 | postgres | UTF8     | en_US.utf8 | en_US.utf8 | =c/postgres
++
+|          |          |            |            | postgres=CTc/postgr
+es
+template1 | postgres | UTF8     | en_US.utf8 | en_US.utf8 | =c/postgres
++
+|          |          |            |            | postgres=CTc/postgr
+es
+(5 rows)
+
+
+\c mydb;
+DROP DATABASE IF EXISTS mydb;
+\du;
+                                  List of roles
+Role name |                         Attributes                         | Member
+of
+-----------+------------------------------------------------------------+-------
+----
+postgres  | Superuser, Create role, Create DB, Replication, Bypass RLS | {}
+
+create table if not exists table_name(id integer);
+\d
+\d table_name
+
++ CHAR=determinated amount of characters;
++ VARCHAR=without empty characters;
+
+new_database=# create table users(login char(10), email varchar(10), age integer);
+new_database=# insert into users(login, email, age) values
+new_database-# ('jake', 'j@mail.ru', 22),
+new_database-# ('bob', 'b.@mail.c', 21);
+INSERT 0 2
+new_database=# \d users
+                      Table "public.users"
+ Column |         Type          | Collation | Nullable | Default
+--------+-----------------------+-----------+----------+---------
+ login  | character(10)         |           |          |
+ email  | character varying(10) |           |          |
+ age    | integer               |           |          |
+
+new_database=# select * from users ;
+   login    |   email   | age
+------------+-----------+-----
+ jake       | j@mail.ru |  22
+ bob        | b.@mail.c |  21
+(2 rows)
+
+new_database=# select * from users ;
+   login    |   email   | age
+------------+-----------+-----
+ jake       | j@mail.ru |  22
+ bob        | b.@mail.c |  21
+(2 rows)
+
+new_database=# select u.age from users u;
+ age
+-----
+  22
+  21
+(2 rows)
+
+alter table users rename to people;
+alter table people add Column comment text;
+alter table people add c text;
+alter table people drop Column c;
+alter table people drop comment;
+alter table people rename Column age to week;
+
+new_database=# alter table users alter column login type varchar(12);
+ALTER TABLE
+new_database=# \d users
+                      Table "public.users"
+ Column |         Type          | Collation | Nullable | Default
+--------+-----------------------+-----------+----------+---------
+ login  | character varying(12) |           |          |
+ email  | character varying(10) |           |          |
+ age    | integer               |           |          |
+
+ new_database=# alter table people alter column firstname type varchar(100);
+ ALTER TABLE
+ new_database=# alter table people alter column lastname type varchar(100);
+ ALTER TABLE
+ new_database=# \d people
+                         Table "public.people"
+   Column   |          Type          | Collation | Nullable | Default
+ -----------+------------------------+-----------+----------+---------
+  firstname | character varying(100) |           |          |
+  lastname  | character varying(100) |           |          |
+  age       | integer                |           |          |
+
+ new_database=# alter table people add column comment text;
+ ALTER TABLE
+ new_database=# alter table people add column weight numeric(4, 1);
+ ALTER TABLE
+
+ new_database=# insert into people values
+new_database-# ('a', 'a', 10, 'c', 111.8),
+new_database-# ('b', 'b', 20, 'b', 11.22);
+INSERT 0 2
+new_database=# select * from people ;
+ firstname | lastname  | age | comment | weight
+-----------+-----------+-----+---------+--------
+ jake      | j@mail.ru |  22 |         |
+ bob       | b.@mail.c |  21 |         |
+ a         | a         |  10 | c       |  111.8
+ b         | b         |  20 | b       |   11.2
+(4 rows)
+
+new_database=# update people set weight = 'NaN' where age = 22;
+UPDATE 1
+new_database=# select * from people ;
+ firstname | lastname  | age | comment | weight
+-----------+-----------+-----+---------+--------
+ bob       | b.@mail.c |  21 |         |
+ a         | a         |  10 | c       |  111.8
+ b         | b         |  20 | b       |   11.2
+ jake      | j@mail.ru |  22 |         |    NaN
+(4 rows)
+
+new_database=# select * from people ;
+ firstname | lastname  | age | comment | weight
+-----------+-----------+-----+---------+--------
+ bob       | b.@mail.c |  21 |         |
+ a         | a         |  10 | c       |  111.8
+ b         | b         |  20 | b       |   11.2
+ jake      | j@mail.ru |  22 |         |    NaN
+(4 rows)
+
+new_database=# select sum(weight) as sum from people ;
+ sum
+-----
+ NaN
+(1 row)
+
+new_database=# delete from people where weight = 'NaN';
+DELETE 1
+new_database=# select sum(weight) as sum from people ;
+  sum
+-------
+ 123.0
+(1 row)
+
+new_database=#
+
+new_database=# update people set age = age, weight = age;
+
+Table "public.two"
+Column |          Type          | Collation | Nullable |             Default
+--------+------------------------+-----------+----------+---------------------------------
+id     | integer                |           | not null | nextval('two_id_seq'::regclass)
+name   | character varying(100) |           |          |
+
+new_database=# insert into two(name) values('name one', 'name second');
+ERROR:  INSERT has more expressions than target columns
+LINE 1: insert into two(name) values('name one', 'name second');
+             ^
+new_database=# insert into two(name) values('name one'), ('name second');
+INSERT 0 2
+new_database=# select * from two;
+id |    name
+----+-------------
+1 | name one
+2 | name second
+(2 rows)
+
+new_database=#
+
+Column  |          Type          | Collation | Nullable |             Default
+---------+------------------------+-----------+----------+---------------------------------
+id      | integer                |           | not null | nextval('two_id_seq'::regclass)
+name    | character varying(100) |           |          |
+id_next | integer                |           |          |
+
+new_database=# create sequence id_next_seq;
+CREATE SEQUENCE
+new_database=# create table two_serial(id_next integer not null default nextval('two_serial_id_next_seq'));
+ERROR:  relation "two_serial_id_next_seq" does not exist
+new_database=# create table two_serial(id_next integer not null default nextval('id_next_seq'));
+CREATE TABLE
+new_database=# \d
+            List of relations
+Schema |    Name     |   Type   |  Owner
+--------+-------------+----------+----------
+public | id_next_seq | sequence | postgres
+public | people      | table    | postgres
+public | two         | table    | postgres
+public | two_id_seq  | sequence | postgres
+public | two_serial  | table    | postgres
+(5 rows)
+
+new_database=# \d two_serial
+                         Table "public.two_serial"
+Column  |  Type   | Collation | Nullable |             Default
+---------+---------+-----------+----------+----------------------------------
+id_next | integer |           | not null | nextval('id_next_seq'::regclass)
+
+new_database=# alter sequence two_id_seq owned by two_serial.id_next;
+ALTER SEQUENCE
+new_database=# nextval(regclass) bigint;
+ERROR:  syntax error at or near "nextval"
+LINE 1: nextval(regclass) bigint;
+       ^
+new_database=#
+new_database=# \d two_serial
+                         Table "public.two_serial"
+Column  |  Type   | Collation | Nullable |             Default
+---------+---------+-----------+----------+----------------------------------
+id_next | integer |           | not null | nextval('id_next_seq'::regclass)
+
+new_database=#
+
+List of relations
+Schema |      Name      |   Type   |  Owner
+--------+----------------+----------+----------
+public | id_next_seq    | sequence | postgres
+public | people         | table    | postgres
+public | testing        | table    | postgres
+public | testing_id_seq | sequence | postgres
+public | two            | table    | postgres
+public | two_id_seq     | sequence | postgres
+public | two_serial     | table    | postgres
+(7 rows)
+
+new_database=# create table checking(name varchar(200), age integer check(age > 0 and age < 100));
+CREATE TABLE
+new_database=# \d checking
+      Table "public.checking"
+Column |          Type          | Collation | Nullable | Default
+--------+------------------------+-----------+----------+---------
+name   | character varying(200) |           |          |
+age    | integer                |           |          |
+Check constraints:
+"checking_age_check" CHECK (age > 0 AND age < 100)
+
+new_database=#
+new_database=# \d checking
+      Table "public.checking"
+Column |          Type          | Collation | Nullable | Default
+--------+------------------------+-----------+----------+---------
+name   | character varying(200) |           |          |
+age    | integer                |           |          |
+Check constraints:
+"checking_age_check" CHECK (age > 0 AND age < 100)
+
+new_database=# insert into checking(name, age) values
+new_database-# ('hello world', 10),
+new_database-# ('world hello', 100);
+ERROR:  new row for relation "checking" violates check constraint "checking_age_check"
+DETAIL:  Failing row contains (world hello, 100).
+new_database=# insert into checking(name, age) values
+('hello world', 10),
+('world hello', 10);
+INSERT 0 2
+new_database=# select * from checking ;
+name     | age
+-------------+-----
+hello world |  10
+world hello |  10
+(2 rows)
+
+new_database=# create table t(age integer, check(age > 0 and age <> 20));
+CREATE TABLE
+new_database=# \d t
+                 Table "public.t"
+ Column |  Type   | Collation | Nullable | Default
+--------+---------+-----------+----------+---------
+ age    | integer |           |          |
+Check constraints:
+    "t_age_check" CHECK (age > 0 AND age <> 20)
+
+new_database=# insert into t values(20);
+ERROR:  new row for relation "t" violates check constraint "t_age_check"
+DETAIL:  Failing row contains (20).
+new_database=# insert into t values(201);
+INSERT 0 1
+new_database=# select age from t;
+ age
+-----
+ 201
+(1 row)
+
+List of relations
+Schema |    Name     |   Type   |  Owner
+--------+-------------+----------+----------
+public | id_next_seq | sequence | postgres
+public | test        | table    | postgres
+public | two_id_seq  | sequence | postgres
+public | two_serial  | table    | postgres
+(4 rows)
+
+new_database=# alter table test add constraint check_price check(price > 0);
+ALTER TABLE
+new_database=# \d test
+   Table "public.test"
+Column |  Type   | Collation | Nullable | Default
+--------+---------+-----------+----------+---------
+price  | integer |           |          |
+disc   | integer |           |          |
+Check constraints:
+"check_price" CHECK (price > 0)
+
+new_database=# alter table test drop constraint check_price;
+ALTER TABLE
+new_database=# \d test\
+   Table "public.test"
+Column |  Type   | Collation | Nullable | Default
+--------+---------+-----------+----------+---------
+price  | integer |           |          |
+disc   | integer |           |          |
+
+Invalid command \. Try \? for help.
+new_database=# \d test
+   Table "public.test"
+Column |  Type   | Collation | Nullable | Default
+--------+---------+-----------+----------+---------
+price  | integer |           |          |
+disc   | integer |           |          |
+
+Schema |    Name     |   Type   |  Owner
+--------+-------------+----------+----------
+public | id_next_seq | sequence | postgres
+public | test        | table    | postgres
+public | two_id_seq  | sequence | postgres
+public | two_serial  | table    | postgres
+(4 rows)
+
+new_database=# drop table test
+new_database-# ;
+DROP TABLE
+new_database=# \d
+            List of relations
+Schema |    Name     |   Type   |  Owner
+--------+-------------+----------+----------
+public | id_next_seq | sequence | postgres
+public | two_id_seq  | sequence | postgres
+public | two_serial  | table    | postgres
+(3 rows)
+
+new_database=# create table test(age integer not null default 0, constraint constraint_check check(age > 0));
+CREATE TABLE
+new_database=# \d test
+               Table "public.test"
+Column |  Type   | Collation | Nullable | Default
+--------+---------+-----------+----------+---------
+age    | integer |           | not null | 0
+Check constraints:
+
+ "constraint_check" CHECK (age > 0)
+
+ Column |     Type     | Collation | Nullable | Default
+--------+--------------+-----------+----------+---------
+ age    | numeric(2,1) |           | not null | 0
+ id     | integer      |           |          |
+Check constraints:
+    "constraint_check" CHECK (age > 0::numeric)
+
+new_database=# drop table test;
+DROP TABLE
+new_database=# create table test(id serial, name varchar(40), constraint primary_key_id primary key(id));
+CREATE TABLE
+new_database=# \d test
+                                   Table "public.test"
+ Column |         Type          | Collation | Nullable |             Default
+--------+-----------------------+-----------+----------+----------------------------------
+ id     | integer               |           | not null | nextval('test_id_seq'::regclass)
+ name   | character varying(40) |           |          |
+Indexes:
+  "primary_key_id" PRIMARY KEY, btree (id)
+
+DROP TABLE
+new_database=# create table test
+new_database-# (id serial primary key, name varchar(20), email varchar(40) unique, age int check(age > 0));
+CREATE TABLE
+new_database=# \d test
+                                   Table "public.test"
+ Column |         Type          | Collation | Nullable |             Default
+--------+-----------------------+-----------+----------+----------------------------------
+ id     | integer               |           | not null | nextval('test_id_seq'::regclass)
+ name   | character varying(20) |           |          |
+ email  | character varying(40) |           |          |
+ age    | integer               |           |          |
+Indexes:
+    "test_pkey" PRIMARY KEY, btree (id)
+    "test_email_key" UNIQUE CONSTRAINT, btree (email)
+Check constraints:
+    "test_age_check" CHECK (age > 0)
+
+/new_database=# \d test
+                                   Table "public.test"
+ Column |         Type          | Collation | Nullable |             Default
+--------+-----------------------+-----------+----------+----------------------------------
+ id     | integer               |           | not null | nextval('test_id_seq'::regclass)
+ name   | character varying(20) |           | not null |
+ email  | character varying(40) |           |          |
+ age    | integer               |           |          |
+Indexes:
+    "test_pkey" PRIMARY KEY, btree (id)
+    "test_email_key" UNIQUE CONSTRAINT, btree (email)
+Check constraints:
+    "test_age_check" CHECK (age > 0)
+
+new_database=# alter table test alter column name drop not null;
+ALTER TABLE
+new_database=# \d test
+                                   Table "public.test"
+ Column |         Type          | Collation | Nullable |             Default
+--------+-----------------------+-----------+----------+----------------------------------
+ id     | integer               |           | not null | nextval('test_id_seq'::regclass)
+ name   | character varying(20) |           |          |
+ email  | character varying(40) |           |          |
+ age    | integer               |           |          |
+Indexes:
+    "test_pkey" PRIMARY KEY, btree (id)
+    "test_email_key" UNIQUE CONSTRAINT, btree (email)
+Check constraints:
+
+==============================        ==============================
+new_database=# \d
+Did not find any relations.
+new_database=# create table customer(id serial primary key, name varchar(20), email varchar(20));
+CREATE TABLE
+new_database=# \d customer;
+                                   Table "public.customer"
+ Column |         Type          | Collation | Nullable |               Default
+--------+-----------------------+-----------+----------+--------------------------------------
+ id     | integer               |           | not null | nextval('customer_id_seq'::regclass)
+ name   | character varying(20) |           |          |
+ email  | character varying(20) |           |          |
+Indexes:
+    "customer_pkey" PRIMARY KEY, btree (id)
+
+new_database=# create table product(id serial primary key, name varchar(20), desc varchar(200), price int);
+ERROR:  syntax error at or near "desc"
+LINE 1: ... product(id serial primary key, name varchar(20), desc varch...
+                                                             ^
+new_database=# create table product(id serial primary key, name varchar(20), description varchar(200), price int);
+CREATE TABLE
+new_database=# \d
+               List of relations
+ Schema |      Name       |   Type   |  Owner
+--------+-----------------+----------+----------
+ public | customer        | table    | postgres
+ public | customer_id_seq | sequence | postgres
+ public | product         | table    | postgres
+ public | product_id_seq  | sequence | postgres
+(4 rows)
+
+new_database=# create table product_photo(id serial primary key, product_id int references product(id));
+CREATE TABLE
+new_database=# \d
+                  List of relations
+ Schema |         Name         |   Type   |  Owner
+--------+----------------------+----------+----------
+ public | customer             | table    | postgres
+ public | customer_id_seq      | sequence | postgres
+ public | product              | table    | postgres
+ public | product_id_seq       | sequence | postgres
+ public | product_photo        | table    | postgres
+ public | product_photo_id_seq | sequence | postgres
+(6 rows)
+
+new_database=# alter table product_photo add column url varchar(255);
+ALTER TABLE
+new_database=# \d product_photo;
+                                      Table "public.product_photo"
+   Column   |          Type          | Collation | Nullable |                  Default
+
+------------+------------------------+-----------+----------+------------------------------------------
+-
+ id         | integer                |           | not null | nextval('product_photo_id_seq'::regclass)
+ product_id | integer                |           |          |
+ url        | character varying(255) |           |          |
+Indexes:
+    "product_photo_pkey" PRIMARY KEY, btree (id)
+Foreign-key constraints:
+    "product_photo_product_id_fkey" FOREIGN KEY (product_id) REFERENCES product(id)
+
+new_database=#
+new_database=# \d
+                  List of relations
+ Schema |         Name         |   Type   |  Owner
+--------+----------------------+----------+----------
+ public | customer             | table    | postgres
+ public | customer_id_seq      | sequence | postgres
+ public | product              | table    | postgres
+ public | product_id_seq       | sequence | postgres
+ public | product_photo        | table    | postgres
+ public | product_photo_id_seq | sequence | postgres
+(6 rows)
+
+new_database=# create table cart(id serial primary key, customer_id integer references customer(id));
+CREATE TABLE
+new_database=# \d
+                  List of relations
+ Schema |         Name         |   Type   |  Owner
+--------+----------------------+----------+----------
+ public | cart                 | table    | postgres
+ public | cart_id_seq          | sequence | postgres
+ public | customer             | table    | postgres
+ public | customer_id_seq      | sequence | postgres
+ public | product              | table    | postgres
+ public | product_id_seq       | sequence | postgres
+ public | product_photo        | table    | postgres
+ public | product_photo_id_seq | sequence | postgres
+(8 rows)
+
+new_database=# create table cart_product(id serial primary key, cart_id int references cart(id), product_id references product(id));
+ERROR:  syntax error at or near "references"
+LINE 1: ... key, cart_id int references cart(id), product_id references...
+                                                             ^
+new_database=# create table cart_product(id serial primary key, cart_id int references cart(id), product_id int references product(id));
+CREATE TABLE
+new_database=# \d
+                  List of relations
+ Schema |         Name         |   Type   |  Owner
+--------+----------------------+----------+----------
+ public | cart                 | table    | postgres
+ public | cart_id_seq          | sequence | postgres
+ public | cart_product         | table    | postgres
+ public | cart_product_id_seq  | sequence | postgres
+ public | customer             | table    | postgres
+ public | customer_id_seq      | sequence | postgres
+ public | product              | table    | postgres
+ public | product_id_seq       | sequence | postgres
+ public | product_photo        | table    | postgres
+ public | product_photo_id_seq | sequence | postgres
+(10 rows)
+
+new_database=#
+
+shop=# select * from customer;
+ id | name
+----+------
+  1 | jake
+  2 | bob
+(2 rows)
+
+shop=# \d product;
+                                    Table "public.product"
+ Column |          Type          | Collation | Nullable |               Default
+--------+------------------------+-----------+----------+-------------------------------------
+ id     | integer                |           | not null | nextval('product_id_seq'::regclass)
+ name   | character varying(255) |           |          |
+ price  | integer                |           |          |
+Indexes:
+    "product_pkey" PRIMARY KEY, btree (id)
+Referenced by:
+    TABLE "cart_product" CONSTRAINT "cart_product_product_id_fkey" FOREIGN KEY (product_id) REFERENCES product(id)
+    TABLE "product_photo" CONSTRAINT "product_photo_product_id_fkey" FOREIGN KEY (product_id) REFERENCES product(id)
+
+shop=# insert into product(name, price) values('water', 100), ('ice', 30);
+INSERT 0 2
+shop=# select * from product;
+ id | name  | price
+----+-------+-------
+  1 | water |   100
+  2 | ice   |    30
+(2 rows)
+
+shop=#
+shop=# \d product_photo
+                                     Table "public.product_photo"
+   Column   |         Type          | Collation | Nullable |                  Default
+------------+-----------------------+-----------+----------+-------------------------------------------
+ id         | integer               |           | not null | nextval('product_photo_id_seq'::regclass)
+ product_id | integer               |           |          |
+ url        | character varying(30) |           |          |
+Indexes:
+    "product_photo_pkey" PRIMARY KEY, btree (id)
+Foreign-key constraints:
+    "product_photo_product_id_fkey" FOREIGN KEY (product_id) REFERENCES product(id)
+
+shop=# insert into product_photo(url, product_id) values('water url', 1), ('ice url', 2);
+INSERT 0 2
+shop=# select * from product_photo;
+ id | product_id |    url
+----+------------+-----------
+  1 |          1 | water url
+  2 |          2 | ice url
+(2 rows)
+
+shop=# select pp.* from product_photo pp left join product p on p.id = pp.product_id;
+ id | product_id |    url
+----+------------+-----------
+  1 |          1 | water url
+  2 |          2 | ice url
+(2 rows)
+
+shop=# select pp.*, p.name from product_photo pp left join product p on p.id = pp.product_id;
+ id | product_id |    url    | name
+----+------------+-----------+-------
+  1 |          1 | water url | water
+  2 |          2 | ice url   | ice
+(2 rows)
+
+shop=# select pp.* from product_photo pp left join product p on p.id = pp.product_id;
+ id | product_id |    url
+----+------------+-----------
+  1 |          1 | water url
+  2 |          2 | ice url
+(2 rows)
+
+shop=# select pp.*, p.name from product_photo pp left join product p on p.id = pp.product_id;
+ id | product_id |    url    | name
+----+------------+-----------+-------
+  1 |          1 | water url | water
+  2 |          2 | ice url   | ice
+(2 rows)
+
+shop=#
+shop=# select * from customer;
+ id | name
+----+------
+  1 | jake
+  2 | bob
+(2 rows)
+
+shop=# select * from cart;
+ id | customer_id
+----+-------------
+(0 rows)
+
+shop=# inser into cart(customer_id) values(1);
+ERROR:  syntax error at or near "inser"
+LINE 1: inser into cart(customer_id) values(1);
+        ^
+shop=# insert into cart(customer_id) values(1);
+INSERT 0 1
+shop=# select * from cart;
+ id | customer_id
+----+-------------
+  1 |           1
+(1 row)
+
+shop=# select * from product;
+ id | name  | price
+----+-------+-------
+  1 | water |   100
+  2 | ice   |    30
+(2 rows)
+
+shop=# \d cart_product
+                              Table "public.cart_product"
+   Column   |  Type   | Collation | Nullable |                 Default
+------------+---------+-----------+----------+------------------------------------------
+ id         | integer |           | not null | nextval('cart_product_id_seq'::regclass)
+ product_id | integer |           |          |
+ cart_id    | integer |           |          |
+Indexes:
+    "cart_product_pkey" PRIMARY KEY, btree (id)
+Foreign-key constraints:
+    "cart_product_cart_id_fkey" FOREIGN KEY (cart_id) REFERENCES cart(id)
+    "cart_product_product_id_fkey" FOREIGN KEY (product_id) REFERENCES product(id)
+
+shop=# insert into cart_product(product_id, cart_id) values(1, 1), (2, 1);
+INSERT 0 2
+shop=# select * from cart_product;
+ id | product_id | cart_id
+----+------------+---------
+  1 |          1 |       1
+  2 |          2 |       1
+(2 rows)
+
+shop=#
+shop=# select * from customer;
+ id | name
+----+------
+  1 | jake
+  2 | bob
+(2 rows)
+
+shop=# select c.name from customer c;
+ name
+------
+ jake
+ bob
+(2 rows)
+
+shop=# select c.name from customer c left outer join on cart.customer_id = c.id;
+ERROR:  syntax error at or near "on"
+LINE 1: select c.name from customer c left outer join on cart.custom...
+                                                      ^
+shop=# select c.name from customer c left outer join cart on cart.customer_id = c.id;
+ name
+------
+ jake
+ bob
+(2 rows)
+
+shop=# select c.name, cart.id from customer c left outer join cart on cart.customer_id = c.id;
+ name | id
+------+----
+ jake |  1
+ bob  |
+(2 rows)
+
+shop=# select c.name, cart.id as cart_id from customer c left outer join cart on cart.customer_id = c.id;
+ name | cart_id
+------+---------
+ jake |       1
+ bob  |
+(2 rows)
+
+shop=# select c.name, cart.id as cart_id from customer c left outer join cart on cart.customer_id = c.id left join cart_product cp on cp.cart_id = cart.id;
+ name | cart_id
+------+---------
+ jake |       1
+ jake |       1
+ bob  |
+(3 rows)
+
+shop=# select c.name, cart.id as cart_id, cp.product.id as product_id from customer c left outer join cart on cart.customer_id = c.id left join cart_product cp on cp.cart_id = cart.id;
+ERROR:  missing FROM-clause entry for table "product"
+LINE 1: select c.name, cart.id as cart_id, cp.product.id as product_...
+                                           ^
+shop=# select c.name, cart.id as cart_id, cp.product_id as product_id from customer c left outer join cart on cart.customer_id = c.id left join cart_product cp on cp.cart_id = cart.id;
+ name | cart_id | product_id
+------+---------+------------
+ jake |       1 |          1
+ jake |       1 |          2
+ bob  |         |
+(3 rows)
+
+shop=# select c.name, cart.id as cart_id, cp.product_id as product_id from customer c left outer join cart on cart.customer_id = c.id left join cart_product cp on cp.cart_id = cart.id left join product p on p.id = cart_pro;
+
+shop=# select c.name, cart.id as cart_id, cp.product_id as product_id from customer c left outer join cart on cart.customer_id = c.id left join cart_product cp on cp.cart_id = cart.id left join product p on p.id = cart_product.product_id;
+ERROR:  invalid reference to FROM-clause entry for table "cart_product"
+LINE 1: ...p.cart_id = cart.id left join product p on p.id = cart_produ...
+                                                             ^
+HINT:  Perhaps you meant to reference the table alias "cp".
+shop=# select c.name, cart.id as cart_id, cp.product_id as product_id from customer c left outer join cart on cart.customer_id = c.id left join cart_product cp on cp.cart_id = cart.id left join product p on p.id = cp.product_id;
+ name | cart_id | product_id
+------+---------+------------
+ jake |       1 |          1
+ jake |       1 |          2
+ bob  |         |
+(3 rows)
+
+shop=# select c.name, cart.id as cart_id, cp.product_id as product_id, p.price from customer c left outer join cart on cart.customer_id = c.id left join cart_product cp on cp.cart_id = cart.id left join product p on p.id = cp.product_id;
+ name | cart_id | product_id | price
+------+---------+------------+-------
+ jake |       1 |          1 |   100
+ jake |       1 |          2 |    30
+ bob  |         |            |
+(3 rows)
+
+shop=# select c.name, coalesce(sum(p.price), 0) from customer c left outer join cart on cart.customer_id = c.id left join cart_product cp on cp.cart_id = cart.id left join product p on p.id = cp.product_id group by c.name order by coalesce;
+ name | coalesce
+------+----------
+ bob  |        0
+ jake |      130
+(2 rows)
+
+shop=# select c.name, coalesce(sum(p.price), 0) as sum from customer c left outer join cart on cart.customer_id = c.id left join cart_product cp on cp.cart_id = cart.id left join product p on p.id = cp.product_id group by c.name order by coalesce desc;
+ name | coalesce
+------+----------
+ jake |      130
+ bob  |        0
+(2 rows)
+
+==============================        ==============================
+\?
+\l
+\conninfo
+You are connected to database "shop" as user "postgres" via socket in "/var/run/postgresql" at port "5432".
+
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Elayne', 'Grinishin', 'Female', 'egrinishinle@wikispaces.com', '2020-10-10');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Lamar', 'Kiley', 'Male', 'lkileylf@blogspot.com', '2020-10-25');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Bear', 'Purse', 'Male', 'bpurselg@china.com.cn', '2020-09-12');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Dix', 'Grivori', 'Female', 'dgrivorilh@istockphoto.com', '2020-10-15');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Briny', 'Bayston', 'Female', 'bbaystonli@smh.com.au', '2020-08-26');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Guillaume', 'Vockings', 'Male', 'gvockingslj@cocolog-nifty.com', '2020-07-01');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Rafe', 'Rigmand', 'Male', 'rrigmandlk@reverbnation.com', '2020-06-23');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Dawna', 'Powner', 'Female', null, '2020-07-31');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Taite', 'Shewon', 'Male', 'tshewonlm@utexas.edu', '2020-08-20');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Major', 'Asman', 'Male', 'masmanln@so-net.ne.jp', '2020-06-30');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Hoebart', 'Kitlee', 'Male', 'hkitleelo@desdev.cn', '2020-04-09');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Hillyer', 'Naisby', 'Male', 'hnaisbylp@goo.ne.jp', '2020-05-24');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Morgun', 'Sands', 'Male', null, '2020-01-18');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Lynda', 'Hebbes', 'Female', null, '2020-04-13');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Hildy', 'Ludee', 'Female', 'hludeels@mozilla.com', '2020-07-24');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Cindy', 'Drains', 'Female', null, '2020-04-10');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Vassili', 'Rapport', 'Male', null, '2020-01-03');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Merry', 'Satford', 'Female', 'msatfordlv@deliciousdays.com', '2020-07-29');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Trefor', 'Drakeford', 'Male', 'tdrakefordlw@apple.com', '2020-10-26');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Natividad', 'Bewlay', 'Female', 'nbewlaylx@youtube.com', '2020-09-07');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Alastair', 'Reames', 'Male', 'areamesly@furl.net', '2020-10-11');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Wilmer', 'Currall', 'Male', 'wcurralllz@eepurl.com', '2020-12-18');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Risa', 'Richen', 'Female', 'rrichenm0@addthis.com', '2020-11-05');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Gracia', 'Chattaway', 'Female', 'gchattawaym1@tiny.cc', '2020-10-11');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Murry', 'Fuzzey', 'Male', null, '2020-04-21');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Si', 'Cayet', 'Male', 'scayetm3@usa.gov', '2020-04-18');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Helaina', 'Warrilow', 'Female', 'hwarrilowm4@yale.edu', '2020-09-14');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Nariko', 'Cheatle', 'Female', 'ncheatlem5@soup.io', '2020-03-11');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Claudetta', 'Bruyns', 'Female', 'cbruynsm6@microsoft.com', '2020-06-09');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Franciskus', 'Beaby', 'Male', null, '2020-08-03');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Baryram', 'McElory', 'Male', null, '2020-05-16');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Cecile', 'Dober', 'Female', 'cdoberm9@is.gd', '2020-11-11');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Olympe', 'Degoix', 'Female', null, '2020-06-05');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Isidro', 'Matton', 'Male', 'imattonmb@cmu.edu', '2020-12-04');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Christiana', 'Haxell', 'Female', 'chaxellmc@about.com', '2020-05-25');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Berne', 'Scini', 'Male', 'bscinimd@printfriendly.com', '2020-03-25');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Ive', 'Clayborn', 'Male', 'iclaybornme@angelfire.com', '2020-12-08');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Artemis', 'Kienle', 'Male', null, '2020-11-05');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Aidan', 'Moston', 'Female', 'amostonmg@devhub.com', '2020-11-01');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Wheeler', 'Birmingham', 'Male', 'wbirminghammh@blogs.com', '2019-12-29');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Vincent', 'Pratchett', 'Male', 'vpratchettmi@usnews.com', '2020-04-02');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Coleman', 'Bulbeck', 'Male', 'cbulbeckmj@alexa.com', '2020-07-20');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Mersey', 'Merner', 'Female', 'mmernermk@goodreads.com', '2020-05-09');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Lilia', 'Idenden', 'Female', 'lidendenml@java.com', '2020-08-04');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Gwenora', 'Harston', 'Female', null, '2020-08-11');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Esteban', 'Zimek', 'Male', 'ezimekmn@dyndns.org', '2020-05-16');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Yolande', 'Bremley', 'Female', 'ybremleymo@php.net', '2020-10-04');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Tailor', 'Eivers', 'Male', null, '2020-11-29');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Micki', 'Lidgey', 'Female', 'mlidgeymq@techcrunch.com', '2020-02-04');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Garvey', 'Wharby', 'Male', 'gwharbymr@state.gov', '2020-09-09');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Yoshi', 'Storrah', 'Female', 'ystorrahms@youtu.be', '2020-07-22');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Paula', 'Riccelli', 'Female', null, '2020-11-23');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Gertrudis', 'Menezes', 'Female', 'gmenezesmu@lycos.com', '2020-11-14');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Olav', 'Mowatt', 'Male', null, '2020-10-13');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Allyce', 'Gergolet', 'Female', 'agergoletmw@ovh.net', '2020-02-14');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Pia', 'Lewty', 'Female', null, '2020-07-30');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Berty', 'Whopples', 'Female', 'bwhopplesmy@eventbrite.com', '2020-05-05');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Izak', 'Leate', 'Male', 'ileatemz@geocities.com', '2020-07-21');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Ferdie', 'Sabater', 'Male', 'fsabatern0@gmpg.org', '2020-01-22');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Allissa', 'O''Fihily', 'Female', 'aofihilyn1@1und1.de', '2020-03-11');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Lilia', 'Ludee', 'Female', 'lludeen2@smugmug.com', '2020-09-19');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Petey', 'Ching', 'Male', 'pchingn3@sina.com.cn', '2020-08-12');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Shaun', 'Le Houx', 'Male', null, '2020-06-23');
+INSERT 0 1
+ensennv@g.co', '2020-11-15');
+insert into MOCK_DATA (first_name, last_name, gendershop=# insert into MOCK_DATA (first_name, last_name, gnde', 'Female', 'desmonden5@spiegel.de', '2020-09-10');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Wendall', 'Chuck', 'Male', 'wchuckn6@oaic.gov.au', '2020-03-11');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Gerome', 'Cowling', 'Male', 'gcowlingn7@comcast.net', '2020-04-11');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Bradan', 'Ruggiero', 'Male', 'bruggieron8@smugmug.com', '2020-05-03');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('George', 'Bosward', 'Male', 'gboswardn9@wisc.edu', '2020-03-20');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Moishe', 'Mangeon', 'Male', 'mmangeonna@360.cn', '2020-09-09');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Georgette', 'Slyne', 'Female', 'gslynenb@apple.com', '2020-10-07');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Krissie', 'Choak', 'Female', 'kchoaknc@bbc.co.uk', '2020-09-09');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Bing', 'Guinn', 'Male', null, '2020-10-22');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Kasey', 'Stranks', 'Female', 'kstranksne@facebook.com', '2020-04-27');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Jacques', 'Glacken', 'Male', null, '2020-04-10');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Marilyn', 'Sebborn', 'Female', null, '2020-02-17');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Grier', 'Graeber', 'Female', 'ggraebernh@posterous.com', '2020-01-30');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Franklyn', 'Stobbart', 'Male', 'fstobbartni@intel.com', '2020-03-11');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Abigael', 'Schuh', 'Female', null, '2020-11-05');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Raimondo', 'Gingell', 'Male', null, '2020-09-04');
+');
+insert into MOINSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Mayer', 'Maryin', 'Male', 'mmaryinnl@marriott.com', '2020-10-09');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Eward', 'Shireff', 'Male', 'eshireffnm@twitpic.com', '2020-07-22');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Martin', 'Rhymer', 'Male', 'mrhymernn@java.com', '2020-06-28');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Colin', 'Rosenblum', 'Male', 'crosenblumno@patch.com', '2020-06-03');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Ewan', 'Cantrell', 'Male', 'ecantrellnp@indiatimes.com', '2020-09-26');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Susanetta', 'Yves', 'Female', 'syvesnq@freewebs.com', '2020-12-17');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Giraud', 'Orys', 'Male', 'gorysnr@youku.com', '2020-07-29');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Harmony', 'Heintsch', 'Female', 'hheintschns@tripod.com', '2020-10-13');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Lyndel', 'Siddons', 'Female', 'lsiddonsnt@ow.ly', '2020-11-13');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Velvet', 'Eichmann', 'Female', 'veichmannnu@noaa.gov', '2020-11-20');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Urbanus', 'Jeppensen', 'Male', 'ujeppensennv@g.co', '2020-11-15');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Carlo', 'Canelas', 'Male', 'ccanelasnw@drupal.org', '2020-01-16');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Ozzy', 'Craig', 'Male', 'ocraignx@cbc.ca', '2020-02-13');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Emelina', 'Danbi', 'Female', 'edanbiny@vkontakte.ru', '2020-07-08');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Abby', 'Roma', 'Male', 'aromanz@skyrock.com', '2020-05-01');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Elvina', 'Tumber', 'Female', 'etumbero0@etsy.com', '2020-01-30');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Alonso', 'Romushkin', 'Male', 'aromushkino1@shinystat.com', '2020-09-19');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Jakob', 'Hugin', 'Male', 'jhugino2@nymag.com', '2020-09-07');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Murial', 'Serginson', 'Female', 'mserginsono3@patch.com', '2019-12-31');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Garner', 'Droogan', 'Male', 'gdroogano4@fastcompany.com', '2020-03-11');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Clarissa', 'Tuther', 'Female', 'ctuthero5@drupal.org', '2020-10-10');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Harriett', 'Tilt', 'Female', 'htilto6@1und1.de', '2020-06-07');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Kendal', 'Lornsen', 'Male', null, '2020-02-20');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Maritsa', 'Lindsley', 'Female', 'mlindsleyo8@taobao.com', '2020-10-06');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Shandra', 'Gerrell', 'Female', 'sgerrello9@mtv.com', '2020-07-19');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Nerta', 'Pinkett', 'Female', 'npinkettoa@gov.uk', '2020-04-27');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Saba', 'Ewert', 'Female', null, '2020-06-13');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Maxim', 'MacKenny', 'Male', null, '2020-07-20');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Rodger', 'Foltin', 'Male', 'rfoltinod@ibm.com', '2020-11-28');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Cassandry', 'Veeler', 'Female', 'cveeleroe@technorati.com', '2020-03-26');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Katerine', 'Pauls', 'Female', 'kpaulsof@skype.com', '2020-05-31');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Elli', 'Ashingden', 'Female', null, '2020-05-22');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Chandra', 'Addionisio', 'Female', null, '2020-03-12');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Thaddeus', 'Bonifacio', 'Male', 'tbonifaciooi@de.vu', '2020-11-16');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Newton', 'Caldes', 'Male', 'ncaldesoj@vinaora.com', '2020-01-05');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Ursa', 'Coltherd', 'Female', 'ucoltherdok@miibeian.gov.cn', '2020-04-08');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Angus', 'Ogelsby', 'Male', 'aogelsbyol@odnoklassniki.ru', '2020-06-12');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Lorne', 'Marten', 'Male', 'lmartenom@exblog.jp', '2020-03-17');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Sherie', 'Wolverson', 'Female', 'swolversonon@nyu.edu', '2020-05-18');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Beale', 'Gentzsch', 'Male', null, '2020-03-30');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Ali', 'Whitcomb', 'Male', null, '2020-03-02');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Cello', 'Snowling', 'Male', 'csnowlingoq@biglobe.ne.jp', '2020-09-28');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Granny', 'Hainsworth', 'Male', 'ghainsworthor@dagondesign.com', '2020-01-03');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Connie', 'Everson', 'Male', null, '2019-12-29');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Hildy', 'Welband', 'Female', 'hwelbandot@go.com', '2020-05-22');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Vassily', 'Fennick', 'Male', 'vfennickou@stumbleupon.com', '2020-01-16');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Belle', 'Dackombe', 'Female', 'bdackombeov@topsy.com', '2020-11-19');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Pierrette', 'Lytton', 'Female', 'plyttonow@icq.com', '2020-12-14');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Carmina', 'Kildahl', 'Female', 'ckildahlox@1und1.de', '2020-08-23');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Maurene', 'Simmell', 'Female', 'msimmelloy@shinystat.com', '2020-11-10');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Guthrie', 'Roelofs', 'Male', null, '2020-04-07');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Janna', 'Shickle', 'Female', 'jshicklep0@ucla.edu', '2020-09-07');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Kain', 'Milbourne', 'Male', null, '2020-12-25');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Perceval', 'Lansdown', 'Male', 'plansdownp2@meetup.com', '2020-01-15');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Emma', 'Gates', 'Female', 'egatesp3@si.edu', '2020-12-19');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Opalina', 'Tankard', 'Female', 'otankardp4@nba.com', '2020-04-09');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Neale', 'Goodsell', 'Male', 'ngoodsellp5@cdc.gov', '2020-07-13');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Caroljean', 'Orhrt', 'Female', 'corhrtp6@domainmarket.com', '2020-12-04');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Ariella', 'Webburn', 'Female', 'awebburnp7@europa.eu', '2020-08-04');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('David', 'Pentelo', 'Male', 'dpentelop8@princeton.edu', '2020-11-12');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Lil', 'Renforth', 'Female', 'lrenforthp9@smugmug.com', '2020-05-15');
+ ('Freda', 'INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Micheil', 'Scheffler', 'Male', 'mschefflerpa@loc.gov', '2020-11-14');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Kelli', 'Ovesen', 'Female', null, '2020-06-21');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Tabbie', 'Olczyk', 'Male', 'tolczykpc@army.mil', '2020-10-03');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Dru', 'Crumpton', 'Male', 'dcrumptonpd@baidu.com', '2020-05-19');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Jarvis', 'Bladder', 'Male', 'jbladderpe@ucoz.com', '2020-06-29');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Buddie', 'Babcock', 'Male', null, '2020-10-01');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Wolfie', 'Rosedale', 'Male', 'wrosedalepg@archive.org', '2020-02-05');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Aristotle', 'Bean', 'Male', 'abeanph@irs.gov', '2020-12-04');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Traci', 'Passby', 'Female', 'tpassbypi@opera.com', '2020-08-06');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Ashby', 'Wheldon', 'Male', 'awheldonpj@exblog.jp', '2020-07-21');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Rae', 'Asquez', 'Female', 'rasquezpk@bbc.co.uk', '2020-07-14');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Reidar', 'Flament', 'Male', 'rflamentpl@bluehost.com', '2020-05-10');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Deborah', 'Wike', 'Female', 'dwikepm@admin.ch', '2020-03-08');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Shanan', 'Novis', 'Male', null, '2020-06-29');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Christa', 'Burgum', 'Female', null, '2020-08-29');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Daphna', 'Tuhy', 'Female', 'dtuhypp@linkedin.com', '2020-09-05');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Steffane', 'Woolway', 'Female', 'swoolwaypq@ning.com', '2020-04-12');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Itch', 'Ritmeyer', 'Male', null, '2020-11-19');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Darline', 'Gomersall', 'Female', 'dgomersallps@sbwire.com', '2020-10-24');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Fedora', 'Tutton', 'Female', 'ftuttonpt@examiner.com', '2020-03-03');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Ely', 'Pedlow', 'Male', null, '2020-07-25');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Elinor', 'Jellman', 'Female', 'ejellmanpv@jigsy.com', '2020-03-29');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Erika', 'Ludewig', 'Female', 'eludewigpw@vkontakte.ru', '2020-11-18');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Ashlie', 'Reddings', 'Female', null, '2020-01-01');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Faith', 'Deane', 'Female', 'fdeanepy@jimdo.com', '2020-04-07');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Hunfredo', 'Cullingford', 'Male', 'hcullingfordpz@blogs.com', '2020-06-19');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Cathrine', 'Lympany', 'Female', 'clympanyq0@rakuten.co.jp', '2020-05-29');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Freda', 'Golbourn', 'Female', 'fgolbournq1@163.com', '2020-08-28');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Dory', 'Thorsby', 'Male', 'dthorsbyq2@sun.com', '2020-12-27');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Halsy', 'Sowerby', 'Male', null, '2020-02-11');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Zaccaria', 'Carren', 'Male', 'zcarrenq4@squarespace.com', '2020-03-23');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Simonne', 'Piegrome', 'Female', 'spiegromeq5@diigo.com', '2020-04-22');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Corissa', 'Monini', 'Female', 'cmoniniq6@yellowpages.com', '2020-10-13');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Leone', 'Farrey', 'Female', 'lfarreyq7@tinypic.com', '2020-06-07');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Dougy', 'Dunkerk', 'Male', null, '2020-04-16');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Tyler', 'Pignon', 'Male', null, '2020-02-25');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Cass', 'Draisey', 'Male', 'cdraiseyqa@who.int', '2020-08-30');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Saidee', 'Fricke', 'Female', 'sfrickeqb@cnet.com', '2020-08-18');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Knox', 'Perocci', 'Male', 'kperocciqc@digg.com', '2020-02-16');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Hilary', 'Varian', 'Male', null, '2020-11-14');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Noak', 'Espie', 'Male', 'nespieqe@nbcnews.com', '2020-12-06');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Imelda', 'Mitroshinov', 'Female', 'imitroshinovqf@angelfire.com', '2020-05-29');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Philippa', 'Dobbin', 'Female', 'pdobbinqg@tumblr.com', '2020-02-06');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Armstrong', 'Bernadot', 'Male', null, '2020-06-14');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Maxy', 'Stenning', 'Female', 'mstenningqi@state.gov', '2020-04-05');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Brenden', 'Bahl', 'Male', 'bbahlqj@cbslocal.com', '2020-08-20');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Guilbert', 'Mills', 'Male', 'gmillsqk@mac.com', '2020-09-10');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Dulcinea', 'Kiffin', 'Female', 'dkiffinql@sun.com', '2020-11-14');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Stevy', 'Pagin', 'Male', 'spaginqm@github.io', '2020-02-11');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Tamarra', 'Newgrosh', 'Female', 'tnewgroshqn@digg.com', '2020-05-08');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Cristi', 'Corss', 'Female', 'ccorssqo@pinterest.com', '2020-03-06');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Kate', 'Dunklee', 'Female', 'kdunkleeqp@ft.com', '2020-12-28');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Daloris', 'Benduhn', 'Female', 'dbenduhnqq@dagondesign.com', '2020-08-16');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Sigfried', 'Caldroni', 'Male', 'scaldroniqr@china.com.cn', '2020-10-14');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Ward', 'Grandison', 'Male', 'wgrandisonqs@wunderground.com', '2020-06-17');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Crysta', 'Hallam', 'Female', 'challamqt@gnu.org', '2020-06-30');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Olin', 'Bail', 'Male', 'obailqu@uol.com.br', '2020-07-30');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Isa', 'Kimmince', 'Male', 'ikimminceqv@ocn.ne.jp', '2020-06-06');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Aimee', 'Pyburn', 'Female', 'apyburnqw@multiply.com', '2020-09-17');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Eb', 'Crockett', 'Male', 'ecrockettqx@theatlantic.com', '2020-04-07');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Mark', 'Gradwell', 'Male', null, '2020-05-27');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Laurella', 'Magenny', 'Female', 'lmagennyqz@slideshare.net', '2020-11-17');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Alta', 'Mac', 'Female', 'amacr0@loc.gov', '2020-07-03');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Lamont', 'McFayden', 'Male', null, '2020-02-28');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Michele', 'Dibbin', 'Female', 'mdibbinr2@forbes.com', '2020-11-19');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Nady', 'Doig', 'Female', 'ndoigr3@amazonaws.com', '2020-06-05');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Melba', 'Bartul', 'Female', null, '2020-10-28');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Codi', 'Korous', 'Female', 'ckorousr5@businessweek.com', '2020-11-29');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Boot', 'Mahaddie', 'Male', null, '2020-10-14');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Igor', 'Pargetter', 'Male', null, '2020-11-23');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Eadmund', 'Coppeard', 'Male', null, '2020-06-12');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Weidar', 'O''Brogan', 'Male', null, '2020-02-13');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Gerald', 'Marlin', 'Male', 'gmarlinra@cbsnews.com', '2020-04-11');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Harlen', 'Adamolli', 'Male', 'hadamollirb@usgs.gov', '2020-01-10');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Randolph', 'Mulqueeny', 'Male', 'rmulqueenyrc@google.com.hk', '2020-09-22');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Nye', 'Divis', 'Male', 'ndivisrd@berkeley.edu', '2020-09-02');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Elyssa', 'Shaul', 'Female', 'eshaulre@delicious.com', '2020-08-12');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Zarah', 'Rubinshtein', 'Female', 'zrubinshteinrf@zdnet.com', '2020-10-09');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Crista', 'Tuffrey', 'Female', null, '2020-11-22');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Bentlee', 'Dace', 'Male', 'bdacerh@soundcloud.com', '2020-11-04');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Jarret', 'Levy', 'Male', 'jlevyri@typepad.com', '2020-06-08');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Tarrah', 'Aguirrezabala', 'Female', null, '2020-05-03');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Olly', 'Filippi', 'Male', 'ofilippirk@mediafire.com', '2020-01-20');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Rhiamon', 'Pesek', 'Female', null, '2020-11-29');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Babette', 'Pinchin', 'Female', 'bpinchinrm@google.cn', '2020-02-11');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Hymie', 'Starte', 'Male', 'hstartern@gizmodo.com', '2020-07-22');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Jackie', 'Phoenix', 'Female', null, '2020-05-27');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Merna', 'Tremeer', 'Female', 'mtremeerrp@google.cn', '2020-07-15');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Martainn', 'Greenly', 'Male', 'mgreenlyrq@imgur.com', '2020-05-06');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Jeffry', 'Marciskewski', 'Male', 'jmarciskewskirr@bigcartel.com', '2020-02-24');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Elayne', 'Grinishin', 'Female', 'egrinishinle@wikispaces.com', '2020-10-10');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Lamar', 'Kiley', 'Male', 'lkileylf@blogspot.com', '2020-10-25');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Bear', 'Purse', 'Male', 'bpurselg@china.com.cn', '2020-09-12');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Dix', 'Grivori', 'Female', 'dgrivorilh@istockphoto.com', '2020-10-15');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Briny', 'Bayston', 'Female', 'bbaystonli@smh.com.au', '2020-08-26');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Guillaume', 'Vockings', 'Male', 'gvockingslj@cocolog-nifty.com', '2020-07-01');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Rafe', 'Rigmand', 'Male', 'rrigmandlk@reverbnation.com', '2020-06-23');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Dawna', 'Powner', 'Female', null, '2020-07-31');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Taite', 'Shewon', 'Male', 'tshewonlm@utexas.edu', '2020-08-20');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Major', 'Asman', 'Male', 'masmanln@so-net.ne.jp', '2020-06-30');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Hoebart', 'Kitlee', 'Male', 'hkitleelo@desdev.cn', '2020-04-09');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Hillyer', 'Naisby', 'Male', 'hnaisbylp@goo.ne.jp', '2020-05-24');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Morgun', 'Sands', 'Male', null, '2020-01-18');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Lynda', 'Hebbes', 'Female', null, '2020-04-13');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Hildy', 'Ludee', 'Female', 'hludeels@mozilla.com', '2020-07-24');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Cindy', 'Drains', 'Female', null, '2020-04-10');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Vassili', 'Rapport', 'Male', null, '2020-01-03');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Merry', 'Satford', 'Female', 'msatfordlv@deliciousdays.com', '2020-07-29');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Trefor', 'Drakeford', 'Male', 'tdrakefordlw@apple.com', '2020-10-26');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Natividad', 'Bewlay', 'Female', 'nbewlaylx@youtube.com', '2020-09-07');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Alastair', 'Reames', 'Male', 'areamesly@furl.net', '2020-10-11');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Wilmer', 'Currall', 'Male', 'wcurralllz@eepurl.com', '2020-12-18');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Risa', 'Richen', 'Female', 'rrichenm0@addthis.com', '2020-11-05');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Gracia', 'Chattaway', 'Female', 'gchattawaym1@tiny.cc', '2020-10-11');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Murry', 'Fuzzey', 'Male', null, '2020-04-21');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Si', 'Cayet', 'Male', 'scayetm3@usa.gov', '2020-04-18');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Helaina', 'Warrilow', 'Female', 'hwarrilowm4@yale.edu', '2020-09-14');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Nariko', 'Cheatle', 'Female', 'ncheatlem5@soup.io', '2020-03-11');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Claudetta', 'Bruyns', 'Female', 'cbruynsm6@microsoft.com', '2020-06-09');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Franciskus', 'Beaby', 'Male', null, '2020-08-03');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Baryram', 'McElory', 'Male', null, '2020-05-16');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Cecile', 'Dober', 'Female', 'cdoberm9@is.gd', '2020-11-11');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Olympe', 'Degoix', 'Female', null, '2020-06-05');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Isidro', 'Matton', 'Male', 'imattonmb@cmu.edu', '2020-12-04');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Christiana', 'Haxell', 'Female', 'chaxellmc@about.com', '2020-05-25');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Berne', 'Scini', 'Male', 'bscinimd@printfriendly.com', '2020-03-25');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Ive', 'Clayborn', 'Male', 'iclaybornme@angelfire.com', '2020-12-08');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Artemis', 'Kienle', 'Male', null, '2020-11-05');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Aidan', 'Moston', 'Female', 'amostonmg@devhub.com', '2020-11-01');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Wheeler', 'Birmingham', 'Male', 'wbirminghammh@blogs.com', '2019-12-29');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Vincent', 'Pratchett', 'Male', 'vpratchettmi@usnews.com', '2020-04-02');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Coleman', 'Bulbeck', 'Male', 'cbulbeckmj@alexa.com', '2020-07-20');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Mersey', 'Merner', 'Female', 'mmernermk@goodreads.com', '2020-05-09');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Lilia', 'Idenden', 'Female', 'lidendenml@java.com', '2020-08-04');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Gwenora', 'Harston', 'Female', null, '2020-08-11');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Esteban', 'Zimek', 'Male', 'ezimekmn@dyndns.org', '2020-05-16');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Yolande', 'Bremley', 'Female', 'ybremleymo@php.net', '2020-10-04');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Tailor', 'Eivers', 'Male', null, '2020-11-29');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Micki', 'Lidgey', 'Female', 'mlidgeymq@techcrunch.com', '2020-02-04');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Garvey', 'Wharby', 'Male', 'gwharbymr@state.gov', '2020-09-09');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Yoshi', 'Storrah', 'Female', 'ystorrahms@youtu.be', '2020-07-22');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Paula', 'Riccelli', 'Female', null, '2020-11-23');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Gertrudis', 'Menezes', 'Female', 'gmenezesmu@lycos.com', '2020-11-14');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Olav', 'Mowatt', 'Male', null, '2020-10-13');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Allyce', 'Gergolet', 'Female', 'agergoletmw@ovh.net', '2020-02-14');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Pia', 'Lewty', 'Female', null, '2020-07-30');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Berty', 'Whopples', 'Female', 'bwhopplesmy@eventbrite.com', '2020-05-05');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Izak', 'Leate', 'Male', 'ileatemz@geocities.com', '2020-07-21');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Ferdie', 'Sabater', 'Male', 'fsabatern0@gmpg.org', '2020-01-22');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Allissa', 'O''Fihily', 'Female', 'aofihilyn1@1und1.de', '2020-03-11');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Lilia', 'Ludee', 'Female', 'lludeen2@smugmug.com', '2020-09-19');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Petey', 'Ching', 'Male', 'pchingn3@sina.com.cn', '2020-08-12');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Shaun', 'Le Houx', 'Male', null, '2020-06-23');
+INSERT 0 1
+ensennv@g.co', '2020-11-15');
+insert into MOCK_DATA (first_name, last_name, gendershop=# insert into MOCK_DATA (first_name, last_name, gnde', 'Female', 'desmonden5@spiegel.de', '2020-09-10');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Wendall', 'Chuck', 'Male', 'wchuckn6@oaic.gov.au', '2020-03-11');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Gerome', 'Cowling', 'Male', 'gcowlingn7@comcast.net', '2020-04-11');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Bradan', 'Ruggiero', 'Male', 'bruggieron8@smugmug.com', '2020-05-03');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('George', 'Bosward', 'Male', 'gboswardn9@wisc.edu', '2020-03-20');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Moishe', 'Mangeon', 'Male', 'mmangeonna@360.cn', '2020-09-09');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Georgette', 'Slyne', 'Female', 'gslynenb@apple.com', '2020-10-07');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Krissie', 'Choak', 'Female', 'kchoaknc@bbc.co.uk', '2020-09-09');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Bing', 'Guinn', 'Male', null, '2020-10-22');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Kasey', 'Stranks', 'Female', 'kstranksne@facebook.com', '2020-04-27');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Jacques', 'Glacken', 'Male', null, '2020-04-10');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Marilyn', 'Sebborn', 'Female', null, '2020-02-17');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Grier', 'Graeber', 'Female', 'ggraebernh@posterous.com', '2020-01-30');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Franklyn', 'Stobbart', 'Male', 'fstobbartni@intel.com', '2020-03-11');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Abigael', 'Schuh', 'Female', null, '2020-11-05');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Raimondo', 'Gingell', 'Male', null, '2020-09-04');
+');
+insert into MOINSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Mayer', 'Maryin', 'Male', 'mmaryinnl@marriott.com', '2020-10-09');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Eward', 'Shireff', 'Male', 'eshireffnm@twitpic.com', '2020-07-22');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Martin', 'Rhymer', 'Male', 'mrhymernn@java.com', '2020-06-28');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Colin', 'Rosenblum', 'Male', 'crosenblumno@patch.com', '2020-06-03');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Ewan', 'Cantrell', 'Male', 'ecantrellnp@indiatimes.com', '2020-09-26');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Susanetta', 'Yves', 'Female', 'syvesnq@freewebs.com', '2020-12-17');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Giraud', 'Orys', 'Male', 'gorysnr@youku.com', '2020-07-29');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Harmony', 'Heintsch', 'Female', 'hheintschns@tripod.com', '2020-10-13');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Lyndel', 'Siddons', 'Female', 'lsiddonsnt@ow.ly', '2020-11-13');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Velvet', 'Eichmann', 'Female', 'veichmannnu@noaa.gov', '2020-11-20');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Urbanus', 'Jeppensen', 'Male', 'ujeppensennv@g.co', '2020-11-15');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Carlo', 'Canelas', 'Male', 'ccanelasnw@drupal.org', '2020-01-16');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Ozzy', 'Craig', 'Male', 'ocraignx@cbc.ca', '2020-02-13');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Emelina', 'Danbi', 'Female', 'edanbiny@vkontakte.ru', '2020-07-08');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Abby', 'Roma', 'Male', 'aromanz@skyrock.com', '2020-05-01');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Elvina', 'Tumber', 'Female', 'etumbero0@etsy.com', '2020-01-30');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Alonso', 'Romushkin', 'Male', 'aromushkino1@shinystat.com', '2020-09-19');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Jakob', 'Hugin', 'Male', 'jhugino2@nymag.com', '2020-09-07');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Murial', 'Serginson', 'Female', 'mserginsono3@patch.com', '2019-12-31');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Garner', 'Droogan', 'Male', 'gdroogano4@fastcompany.com', '2020-03-11');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Clarissa', 'Tuther', 'Female', 'ctuthero5@drupal.org', '2020-10-10');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Harriett', 'Tilt', 'Female', 'htilto6@1und1.de', '2020-06-07');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Kendal', 'Lornsen', 'Male', null, '2020-02-20');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Maritsa', 'Lindsley', 'Female', 'mlindsleyo8@taobao.com', '2020-10-06');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Shandra', 'Gerrell', 'Female', 'sgerrello9@mtv.com', '2020-07-19');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Nerta', 'Pinkett', 'Female', 'npinkettoa@gov.uk', '2020-04-27');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Saba', 'Ewert', 'Female', null, '2020-06-13');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Maxim', 'MacKenny', 'Male', null, '2020-07-20');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Rodger', 'Foltin', 'Male', 'rfoltinod@ibm.com', '2020-11-28');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Cassandry', 'Veeler', 'Female', 'cveeleroe@technorati.com', '2020-03-26');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Katerine', 'Pauls', 'Female', 'kpaulsof@skype.com', '2020-05-31');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Elli', 'Ashingden', 'Female', null, '2020-05-22');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Chandra', 'Addionisio', 'Female', null, '2020-03-12');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Thaddeus', 'Bonifacio', 'Male', 'tbonifaciooi@de.vu', '2020-11-16');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Newton', 'Caldes', 'Male', 'ncaldesoj@vinaora.com', '2020-01-05');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Ursa', 'Coltherd', 'Female', 'ucoltherdok@miibeian.gov.cn', '2020-04-08');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Angus', 'Ogelsby', 'Male', 'aogelsbyol@odnoklassniki.ru', '2020-06-12');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Lorne', 'Marten', 'Male', 'lmartenom@exblog.jp', '2020-03-17');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Sherie', 'Wolverson', 'Female', 'swolversonon@nyu.edu', '2020-05-18');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Beale', 'Gentzsch', 'Male', null, '2020-03-30');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Ali', 'Whitcomb', 'Male', null, '2020-03-02');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Cello', 'Snowling', 'Male', 'csnowlingoq@biglobe.ne.jp', '2020-09-28');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Granny', 'Hainsworth', 'Male', 'ghainsworthor@dagondesign.com', '2020-01-03');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Connie', 'Everson', 'Male', null, '2019-12-29');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Hildy', 'Welband', 'Female', 'hwelbandot@go.com', '2020-05-22');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Vassily', 'Fennick', 'Male', 'vfennickou@stumbleupon.com', '2020-01-16');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Belle', 'Dackombe', 'Female', 'bdackombeov@topsy.com', '2020-11-19');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Pierrette', 'Lytton', 'Female', 'plyttonow@icq.com', '2020-12-14');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Carmina', 'Kildahl', 'Female', 'ckildahlox@1und1.de', '2020-08-23');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Maurene', 'Simmell', 'Female', 'msimmelloy@shinystat.com', '2020-11-10');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Guthrie', 'Roelofs', 'Male', null, '2020-04-07');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Janna', 'Shickle', 'Female', 'jshicklep0@ucla.edu', '2020-09-07');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Kain', 'Milbourne', 'Male', null, '2020-12-25');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Perceval', 'Lansdown', 'Male', 'plansdownp2@meetup.com', '2020-01-15');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Emma', 'Gates', 'Female', 'egatesp3@si.edu', '2020-12-19');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Opalina', 'Tankard', 'Female', 'otankardp4@nba.com', '2020-04-09');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Neale', 'Goodsell', 'Male', 'ngoodsellp5@cdc.gov', '2020-07-13');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Caroljean', 'Orhrt', 'Female', 'corhrtp6@domainmarket.com', '2020-12-04');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Ariella', 'Webburn', 'Female', 'awebburnp7@europa.eu', '2020-08-04');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('David', 'Pentelo', 'Male', 'dpentelop8@princeton.edu', '2020-11-12');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Lil', 'Renforth', 'Female', 'lrenforthp9@smugmug.com', '2020-05-15');
+ ('Freda', 'INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Micheil', 'Scheffler', 'Male', 'mschefflerpa@loc.gov', '2020-11-14');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Kelli', 'Ovesen', 'Female', null, '2020-06-21');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Tabbie', 'Olczyk', 'Male', 'tolczykpc@army.mil', '2020-10-03');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Dru', 'Crumpton', 'Male', 'dcrumptonpd@baidu.com', '2020-05-19');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Jarvis', 'Bladder', 'Male', 'jbladderpe@ucoz.com', '2020-06-29');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Buddie', 'Babcock', 'Male', null, '2020-10-01');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Wolfie', 'Rosedale', 'Male', 'wrosedalepg@archive.org', '2020-02-05');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Aristotle', 'Bean', 'Male', 'abeanph@irs.gov', '2020-12-04');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Traci', 'Passby', 'Female', 'tpassbypi@opera.com', '2020-08-06');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Ashby', 'Wheldon', 'Male', 'awheldonpj@exblog.jp', '2020-07-21');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Rae', 'Asquez', 'Female', 'rasquezpk@bbc.co.uk', '2020-07-14');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Reidar', 'Flament', 'Male', 'rflamentpl@bluehost.com', '2020-05-10');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Deborah', 'Wike', 'Female', 'dwikepm@admin.ch', '2020-03-08');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Shanan', 'Novis', 'Male', null, '2020-06-29');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Christa', 'Burgum', 'Female', null, '2020-08-29');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Daphna', 'Tuhy', 'Female', 'dtuhypp@linkedin.com', '2020-09-05');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Steffane', 'Woolway', 'Female', 'swoolwaypq@ning.com', '2020-04-12');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Itch', 'Ritmeyer', 'Male', null, '2020-11-19');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Darline', 'Gomersall', 'Female', 'dgomersallps@sbwire.com', '2020-10-24');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Fedora', 'Tutton', 'Female', 'ftuttonpt@examiner.com', '2020-03-03');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Ely', 'Pedlow', 'Male', null, '2020-07-25');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Elinor', 'Jellman', 'Female', 'ejellmanpv@jigsy.com', '2020-03-29');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Erika', 'Ludewig', 'Female', 'eludewigpw@vkontakte.ru', '2020-11-18');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Ashlie', 'Reddings', 'Female', null, '2020-01-01');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Faith', 'Deane', 'Female', 'fdeanepy@jimdo.com', '2020-04-07');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Hunfredo', 'Cullingford', 'Male', 'hcullingfordpz@blogs.com', '2020-06-19');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Cathrine', 'Lympany', 'Female', 'clympanyq0@rakuten.co.jp', '2020-05-29');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Freda', 'Golbourn', 'Female', 'fgolbournq1@163.com', '2020-08-28');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Dory', 'Thorsby', 'Male', 'dthorsbyq2@sun.com', '2020-12-27');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Halsy', 'Sowerby', 'Male', null, '2020-02-11');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Zaccaria', 'Carren', 'Male', 'zcarrenq4@squarespace.com', '2020-03-23');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Simonne', 'Piegrome', 'Female', 'spiegromeq5@diigo.com', '2020-04-22');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Corissa', 'Monini', 'Female', 'cmoniniq6@yellowpages.com', '2020-10-13');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Leone', 'Farrey', 'Female', 'lfarreyq7@tinypic.com', '2020-06-07');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Dougy', 'Dunkerk', 'Male', null, '2020-04-16');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Tyler', 'Pignon', 'Male', null, '2020-02-25');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Cass', 'Draisey', 'Male', 'cdraiseyqa@who.int', '2020-08-30');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Saidee', 'Fricke', 'Female', 'sfrickeqb@cnet.com', '2020-08-18');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Knox', 'Perocci', 'Male', 'kperocciqc@digg.com', '2020-02-16');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Hilary', 'Varian', 'Male', null, '2020-11-14');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Noak', 'Espie', 'Male', 'nespieqe@nbcnews.com', '2020-12-06');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Imelda', 'Mitroshinov', 'Female', 'imitroshinovqf@angelfire.com', '2020-05-29');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Philippa', 'Dobbin', 'Female', 'pdobbinqg@tumblr.com', '2020-02-06');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Armstrong', 'Bernadot', 'Male', null, '2020-06-14');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Maxy', 'Stenning', 'Female', 'mstenningqi@state.gov', '2020-04-05');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Brenden', 'Bahl', 'Male', 'bbahlqj@cbslocal.com', '2020-08-20');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Guilbert', 'Mills', 'Male', 'gmillsqk@mac.com', '2020-09-10');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Dulcinea', 'Kiffin', 'Female', 'dkiffinql@sun.com', '2020-11-14');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Stevy', 'Pagin', 'Male', 'spaginqm@github.io', '2020-02-11');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Tamarra', 'Newgrosh', 'Female', 'tnewgroshqn@digg.com', '2020-05-08');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Cristi', 'Corss', 'Female', 'ccorssqo@pinterest.com', '2020-03-06');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Kate', 'Dunklee', 'Female', 'kdunkleeqp@ft.com', '2020-12-28');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Daloris', 'Benduhn', 'Female', 'dbenduhnqq@dagondesign.com', '2020-08-16');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Sigfried', 'Caldroni', 'Male', 'scaldroniqr@china.com.cn', '2020-10-14');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Ward', 'Grandison', 'Male', 'wgrandisonqs@wunderground.com', '2020-06-17');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Crysta', 'Hallam', 'Female', 'challamqt@gnu.org', '2020-06-30');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Olin', 'Bail', 'Male', 'obailqu@uol.com.br', '2020-07-30');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Isa', 'Kimmince', 'Male', 'ikimminceqv@ocn.ne.jp', '2020-06-06');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Aimee', 'Pyburn', 'Female', 'apyburnqw@multiply.com', '2020-09-17');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Eb', 'Crockett', 'Male', 'ecrockettqx@theatlantic.com', '2020-04-07');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Mark', 'Gradwell', 'Male', null, '2020-05-27');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Laurella', 'Magenny', 'Female', 'lmagennyqz@slideshare.net', '2020-11-17');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Alta', 'Mac', 'Female', 'amacr0@loc.gov', '2020-07-03');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Lamont', 'McFayden', 'Male', null, '2020-02-28');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Michele', 'Dibbin', 'Female', 'mdibbinr2@forbes.com', '2020-11-19');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Nady', 'Doig', 'Female', 'ndoigr3@amazonaws.com', '2020-06-05');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Melba', 'Bartul', 'Female', null, '2020-10-28');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Codi', 'Korous', 'Female', 'ckorousr5@businessweek.com', '2020-11-29');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Boot', 'Mahaddie', 'Male', null, '2020-10-14');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Igor', 'Pargetter', 'Male', null, '2020-11-23');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Eadmund', 'Coppeard', 'Male', null, '2020-06-12');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Weidar', 'O''Brogan', 'Male', null, '2020-02-13');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Gerald', 'Marlin', 'Male', 'gmarlinra@cbsnews.com', '2020-04-11');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Harlen', 'Adamolli', 'Male', 'hadamollirb@usgs.gov', '2020-01-10');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Randolph', 'Mulqueeny', 'Male', 'rmulqueenyrc@google.com.hk', '2020-09-22');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Nye', 'Divis', 'Male', 'ndivisrd@berkeley.edu', '2020-09-02');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Elyssa', 'Shaul', 'Female', 'eshaulre@delicious.com', '2020-08-12');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Zarah', 'Rubinshtein', 'Female', 'zrubinshteinrf@zdnet.com', '2020-10-09');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Crista', 'Tuffrey', 'Female', null, '2020-11-22');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Bentlee', 'Dace', 'Male', 'bdacerh@soundcloud.com', '2020-11-04');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Jarret', 'Levy', 'Male', 'jlevyri@typepad.com', '2020-06-08');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Tarrah', 'Aguirrezabala', 'Female', null, '2020-05-03');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Olly', 'Filippi', 'Male', 'ofilippirk@mediafire.com', '2020-01-20');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Rhiamon', 'Pesek', 'Female', null, '2020-11-29');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Babette', 'Pinchin', 'Female', 'bpinchinrm@google.cn', '2020-02-11');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Hymie', 'Starte', 'Male', 'hstartern@gizmodo.com', '2020-07-22');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Jackie', 'Phoenix', 'Female', null, '2020-05-27');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Merna', 'Tremeer', 'Female', 'mtremeerrp@google.cn', '2020-07-15');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Martainn', 'Greenly', 'Male', 'mgreenlyrq@imgur.com', '2020-05-06');
+INSERT 0 1
+shop=# insert into MOCK_DATA (first_name, last_name, gender, email, date_of_birth) values ('Jeffry', 'Marciskewski', 'Male', 'jmarciskewskirr@bigcartel.com', '2020-02-24');
+INSERT 0 1
+
+shop=# select * from mock_data;
+  id  | first_name  |    last_name    | gender |                email                 | date_of_birth
+------+-------------+-----------------+--------+--------------------------------------+---------------
+    1 | Hetti       | Porkiss         | Female |                                      | 2020-12-07
+    2 | Petey       | Gristock        | Male   |                                      | 2020-07-21
+    3 | Friedrick   | Henrys          | Male   | fhenrys2@mit.edu                     | 2020-01-02
+    4 | Krista      | Aynsley         | Female | kaynsley3@nbcnews.com                | 2020-02-29
+    5 | Rosco       | Arrighetti      | Male   | rarrighetti4@csmonitor.com           | 2020-03-25
+    6 | Gibb        | Moxsom          | Male   |                                      | 2020-10-26
+    7 | Elmo        | Strange         | Male   | estrange6@seesaa.net                 | 2020-04-03
+    8 | Kelly       | Streeton        | Female | kstreeton7@cbsnews.com               | 2020-10-30
+    9 | Vale        | Slipper         | Male   |                                      | 2020-12-03
+   10 | Link        | Bittlestone     | Male   | lbittlestone9@archive.org            | 2020-08-23
+   11 | Maible      | Wynrehame       | Female |                                      | 2020-03-31
+   12 | Cami        | Ronchka         | Female | cronchkab@samsung.com                | 2020-05-15
+   13 | Savina      | Penritt         | Female | spenrittc@opensource.org             | 2020-06-22
+   14 | Jo-ann      | Powland         | Female | jpowlandd@google.es                  | 2020-02-22
+   15 | Lorin       | McHale          | Male   | lmchalee@npr.org                     | 2020-02-09
+   16 | Evered      | Ranfield        | Male   |                                      | 2020-04-11
+   17 | Willi       | Fazzioli        | Female |                                      | 2020-01-29
+   18 | Huntley     | Lawty           | Male   |                                      | 2020-06-06
+shop=#
+
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (888, 'Dominican Republic', 'Salcedo', '8422.76');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (889, 'Latvia', 'Brocēni', '7528.60');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (890, 'France', 'Châteauroux', '7541.89');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (891, 'Russia', 'Novoul’yanovsk', '8766.53');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (892, 'Palestinian Territory', 'Immātīn', null);
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (893, 'Philippines', 'Balogo', '1856.90');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (894, 'China', 'Zengtian', null);
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (895, 'China', 'Xiaohekou', '5686.95');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (896, 'Argentina', 'General Alvear', '5387.04');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (897, 'China', 'Xinchong', '2373.60');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (898, 'Thailand', 'Sapphaya', '6369.15');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (899, 'Guam', 'Asan-Maina Village', '8916.36');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (900, 'Indonesia', 'Pasrukrajan Satu', '6031.14');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (901, 'Nigeria', 'Owerri', null);
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (902, 'Burkina Faso', 'Fada N''gourma', '3541.54');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (903, 'Portugal', 'Lobão', '8746.61');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (904, 'Ukraine', 'Verkhnyachka', null);
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (905, 'China', 'Sankeyushu', '3105.17');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (906, 'Philippines', 'Monkayo', '4620.34');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (907, 'Armenia', 'Ararat', '7539.68');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (908, 'Sudan', 'Al Qiţena', '2701.02');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (909, 'Papua New Guinea', 'Vanimo', '8627.14');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (910, 'Chile', 'Puente Alto', '6257.08');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (911, 'Philippines', 'Santiago', '363.40');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (912, 'China', 'Shuangchahe', '1569.88');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (913, 'Belarus', 'Horad Krychaw', '4368.94');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (914, 'France', 'Paris 19', '4314.04');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (915, 'Libya', 'Tobruk', '9011.89');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (916, 'Czech Republic', 'Francova Lhota', '7819.68');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (917, 'Egypt', 'Juhaynah', null);
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (918, 'China', 'Yanxi', '3802.66');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (919, 'Brazil', 'São José do Rio Preto', '7752.95');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (920, 'Indonesia', 'Cibeureum', '2396.16');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (921, 'Tunisia', 'La Sebala du Mornag', '9332.69');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (922, 'China', 'Gangbei', '541.72');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (923, 'Czech Republic', 'České Meziříčí', null);
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (924, 'Brazil', 'João Pinheiro', '9458.52');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (925, 'Philippines', 'Tinampo', '961.00');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (926, 'Armenia', 'Abovyan', null);
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (927, 'Afghanistan', 'Shahrak', null);
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (928, 'Peru', 'Cabanilla', '1774.15');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (929, 'Argentina', 'Embarcación', '9062.33');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (930, 'Thailand', 'Pak Phli', '1780.34');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (931, 'Indonesia', 'Cineumbeuy', '9113.87');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (932, 'China', 'Huoqiu Chengguanzhen', '447.09');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (933, 'France', 'Marseille', '4273.76');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (934, 'Sweden', 'Göteborg', '335.86');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (935, 'Philippines', 'Tobias Fornier', '9074.85');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (936, 'China', 'Shanghudi', '4227.27');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (937, 'Serbia', 'Platičevo', '9182.89');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (938, 'Bonaire, Saint Eustatius and Saba ', 'Upper Hell''s Gate', '9646.84');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (939, 'Argentina', 'La Cruz', '8239.64');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (940, 'China', 'Erong', null);
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (941, 'Vietnam', 'Thị Trấn Ngọc Lặc', '8140.24');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (942, 'Saudi Arabia', 'Ad Dilam', '3296.08');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (943, 'Indonesia', 'Mojorembun', '9272.40');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (944, 'Bulgaria', 'Vidin', '2009.49');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (945, 'Russia', 'Pervomayskiy', '8305.81');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (946, 'Canada', 'Assiniboia', '6594.97');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (947, 'Indonesia', 'Cibolang', '1849.95');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (948, 'Peru', 'Longuita', null);
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (949, 'Haiti', 'Cornillon', '1363.55');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (950, 'France', 'Tours', '4817.66');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (951, 'France', 'Le Grand-Quevilly', '2225.73');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (952, 'Ireland', 'Kingscourt', '7665.61');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (953, 'China', 'Leijiadian', '4637.57');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (954, 'Indonesia', 'Kauman', '6046.61');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (955, 'Russia', 'Lotoshino', '5802.27');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (956, 'Comoros', 'Ntsoudjini', null);
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (957, 'China', 'Aguitu', '9100.77');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (958, 'Indonesia', 'Pasireurih', null);
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (959, 'Morocco', 'Tmourghout', null);
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (960, 'Uganda', 'Kyankwanzi', '5729.31');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (961, 'Indonesia', 'Cigagade', '5909.39');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (962, 'Philippines', 'Bagumbayan', null);
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (963, 'Chile', 'Melipilla', '1053.66');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (964, 'Philippines', 'Kinalansan', '1401.53');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (965, 'Brazil', 'Carlos Barbosa', '9555.09');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (966, 'Indonesia', 'Sambonggede', '8792.03');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (967, 'China', 'Pudong', '9770.08');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (968, 'Tajikistan', 'Dushanbe', '4251.27');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (969, 'South Africa', 'Hermanus', '3578.28');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (970, 'Canada', 'Lamont', null);
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (971, 'Brazil', 'Carmo do Cajuru', null);
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (972, 'China', 'Anjia', '2683.86');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (973, 'China', 'Simajia', '7384.25');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (974, 'Mongolia', 'Mandalgovi', '6085.08');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (975, 'Portugal', 'Senhor da Serra', '5132.36');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (976, 'Croatia', 'Galovac', null);
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (977, 'Czech Republic', 'Darkovice', null);
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (978, 'United States', 'Richmond', '1775.89');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (979, 'Portugal', 'Lisboa', '8974.01');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (980, 'Argentina', 'San Carlos de Bolívar', '1413.75');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (981, 'Russia', 'Krasnorechenskiy', '7939.91');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (982, 'Guam', 'Agat Village', '5337.96');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (983, 'China', 'Xinshancun', '2773.56');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (984, 'Albania', 'Krahës', null);
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (985, 'China', 'Taiping', '8948.74');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (986, 'China', 'Xinzhai', '9944.70');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (987, 'Philippines', 'Batasan Bata', '8613.29');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (988, 'Philippines', 'San Sebastian', '8399.38');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (989, 'United States', 'Racine', '521.91');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (990, 'Indonesia', 'Cibiru', '4895.98');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (991, 'China', 'Sishan', null);
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (992, 'Albania', 'Dajt', '4471.44');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (993, 'Peru', 'Viraco', '9042.23');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (994, 'Brazil', 'Lagoa da Prata', '5328.93');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (995, 'Poland', 'Złoty Stok', null);
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (996, 'Ukraine', 'Stepanivka', '9559.09');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (997, 'Portugal', 'Chaves', '8591.43');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (998, 'Sweden', 'Rimbo', null);
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (999, 'New Zealand', 'Maketu', '1764.23');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (1000, 'Bolivia', 'Tupiza', '4621.60');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (888, 'Dominican Republic', 'Salcedo', '8422.76');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (889, 'Latvia', 'Brocēni', '7528.60');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (890, 'France', 'Châteauroux', '7541.89');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (891, 'Russia', 'Novoul’yanovsk', '8766.53');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (892, 'Palestinian Territory', 'Immātīn', null);
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (893, 'Philippines', 'Balogo', '1856.90');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (894, 'China', 'Zengtian', null);
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (895, 'China', 'Xiaohekou', '5686.95');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (896, 'Argentina', 'General Alvear', '5387.04');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (897, 'China', 'Xinchong', '2373.60');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (898, 'Thailand', 'Sapphaya', '6369.15');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (899, 'Guam', 'Asan-Maina Village', '8916.36');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (900, 'Indonesia', 'Pasrukrajan Satu', '6031.14');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (901, 'Nigeria', 'Owerri', null);
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (902, 'Burkina Faso', 'Fada N''gourma', '3541.54');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (903, 'Portugal', 'Lobão', '8746.61');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (904, 'Ukraine', 'Verkhnyachka', null);
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (905, 'China', 'Sankeyushu', '3105.17');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (906, 'Philippines', 'Monkayo', '4620.34');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (907, 'Armenia', 'Ararat', '7539.68');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (908, 'Sudan', 'Al Qiţena', '2701.02');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (909, 'Papua New Guinea', 'Vanimo', '8627.14');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (910, 'Chile', 'Puente Alto', '6257.08');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (911, 'Philippines', 'Santiago', '363.40');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (912, 'China', 'Shuangchahe', '1569.88');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (913, 'Belarus', 'Horad Krychaw', '4368.94');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (914, 'France', 'Paris 19', '4314.04');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (915, 'Libya', 'Tobruk', '9011.89');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (916, 'Czech Republic', 'Francova Lhota', '7819.68');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (917, 'Egypt', 'Juhaynah', null);
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (918, 'China', 'Yanxi', '3802.66');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (919, 'Brazil', 'São José do Rio Preto', '7752.95');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (920, 'Indonesia', 'Cibeureum', '2396.16');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (921, 'Tunisia', 'La Sebala du Mornag', '9332.69');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (922, 'China', 'Gangbei', '541.72');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (923, 'Czech Republic', 'České Meziříčí', null);
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (924, 'Brazil', 'João Pinheiro', '9458.52');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (925, 'Philippines', 'Tinampo', '961.00');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (926, 'Armenia', 'Abovyan', null);
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (927, 'Afghanistan', 'Shahrak', null);
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (928, 'Peru', 'Cabanilla', '1774.15');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (929, 'Argentina', 'Embarcación', '9062.33');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (930, 'Thailand', 'Pak Phli', '1780.34');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (931, 'Indonesia', 'Cineumbeuy', '9113.87');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (932, 'China', 'Huoqiu Chengguanzhen', '447.09');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (933, 'France', 'Marseille', '4273.76');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (934, 'Sweden', 'Göteborg', '335.86');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (935, 'Philippines', 'Tobias Fornier', '9074.85');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (936, 'China', 'Shanghudi', '4227.27');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (937, 'Serbia', 'Platičevo', '9182.89');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (938, 'Bonaire, Saint Eustatius and Saba ', 'Upper Hell''s Gate', '9646.84');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (939, 'Argentina', 'La Cruz', '8239.64');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (940, 'China', 'Erong', null);
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (941, 'Vietnam', 'Thị Trấn Ngọc Lặc', '8140.24');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (942, 'Saudi Arabia', 'Ad Dilam', '3296.08');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (943, 'Indonesia', 'Mojorembun', '9272.40');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (944, 'Bulgaria', 'Vidin', '2009.49');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (945, 'Russia', 'Pervomayskiy', '8305.81');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (946, 'Canada', 'Assiniboia', '6594.97');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (947, 'Indonesia', 'Cibolang', '1849.95');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (948, 'Peru', 'Longuita', null);
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (949, 'Haiti', 'Cornillon', '1363.55');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (950, 'France', 'Tours', '4817.66');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (951, 'France', 'Le Grand-Quevilly', '2225.73');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (952, 'Ireland', 'Kingscourt', '7665.61');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (953, 'China', 'Leijiadian', '4637.57');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (954, 'Indonesia', 'Kauman', '6046.61');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (955, 'Russia', 'Lotoshino', '5802.27');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (956, 'Comoros', 'Ntsoudjini', null);
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (957, 'China', 'Aguitu', '9100.77');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (958, 'Indonesia', 'Pasireurih', null);
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (959, 'Morocco', 'Tmourghout', null);
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (960, 'Uganda', 'Kyankwanzi', '5729.31');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (961, 'Indonesia', 'Cigagade', '5909.39');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (962, 'Philippines', 'Bagumbayan', null);
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (963, 'Chile', 'Melipilla', '1053.66');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (964, 'Philippines', 'Kinalansan', '1401.53');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (965, 'Brazil', 'Carlos Barbosa', '9555.09');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (966, 'Indonesia', 'Sambonggede', '8792.03');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (967, 'China', 'Pudong', '9770.08');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (968, 'Tajikistan', 'Dushanbe', '4251.27');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (969, 'South Africa', 'Hermanus', '3578.28');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (970, 'Canada', 'Lamont', null);
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (971, 'Brazil', 'Carmo do Cajuru', null);
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (972, 'China', 'Anjia', '2683.86');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (973, 'China', 'Simajia', '7384.25');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (974, 'Mongolia', 'Mandalgovi', '6085.08');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (975, 'Portugal', 'Senhor da Serra', '5132.36');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (976, 'Croatia', 'Galovac', null);
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (977, 'Czech Republic', 'Darkovice', null);
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (978, 'United States', 'Richmond', '1775.89');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (979, 'Portugal', 'Lisboa', '8974.01');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (980, 'Argentina', 'San Carlos de Bolívar', '1413.75');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (981, 'Russia', 'Krasnorechenskiy', '7939.91');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (982, 'Guam', 'Agat Village', '5337.96');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (983, 'China', 'Xinshancun', '2773.56');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (984, 'Albania', 'Krahës', null);
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (985, 'China', 'Taiping', '8948.74');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (986, 'China', 'Xinzhai', '9944.70');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (987, 'Philippines', 'Batasan Bata', '8613.29');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (988, 'Philippines', 'San Sebastian', '8399.38');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (989, 'United States', 'Racine', '521.91');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (990, 'Indonesia', 'Cibiru', '4895.98');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (991, 'China', 'Sishan', null);
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (992, 'Albania', 'Dajt', '4471.44');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (993, 'Peru', 'Viraco', '9042.23');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (994, 'Brazil', 'Lagoa da Prata', '5328.93');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (995, 'Poland', 'Złoty Stok', null);
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (996, 'Ukraine', 'Stepanivka', '9559.09');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (997, 'Portugal', 'Chaves', '8591.43');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (998, 'Sweden', 'Rimbo', null);
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (999, 'New Zealand', 'Maketu', '1764.23');
+INSERT 0 1
+shop=# insert into HOLIDAY (id, destination_country, destination_city, price) values (1000, 'Bolivia', 'Tupiza', '4621.60');
+INSERT 0 1

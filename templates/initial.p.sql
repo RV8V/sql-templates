@@ -73,3 +73,37 @@ SELECT c.name, cart.id as cart_id, cp.product_id, COALESCE(SUM(product.price), 0
     HAVING SUM(p.price) > 0
     ORDER BY orders_sum DESC;
 SELECT * FROM customer ORDER BY name using ~<~ LIMIT 1 OFFSET 1;
+
+-- ==============================        ==============================
+SELECT FROM MOCK_DATA;
+SELECT * FROM mock_data WHERE gender = 'Female' OFFSET 5 LIMIT 5;
+SELECT * FROM mock_data WHERE gender = 'Female' OFFSET 5 FETCH FIRST 5 ROW ONLY;
+SELECT * FROM mock_data WHERE date_of_birth BETWEEN '2004-05-04' AND '2008-09-02';
+SELECT gender, COUNT(*) FROM mock_data GROUP BY gender;
+SELECT first_name, COUNT(*) FROM mock_data GROUP BY first_name HAVING COUNT(*) > 2;
+SELECT ROUND(AVG(price)) FROM holiday;
+SELECT destination_country, destination_city, MAX(price) FROM holiday GROUP BY destination_city, destination_country;
+SELECT destination_city, COALESCE(MAX(price), 0) AS price FROM holiday GROUP BY destination_city ORDER BY price DESC;
+SELECT 100 + 2;
+SELECT 100 - 2;
+SELECT 100 * 2;
+SELECT 100 / 2;
+SELECT 100 % 2;
+SELECT 5!;
+SELECT NOW()::DATE;
+SELECT NOW()::TIME;
+SELECT NOW() - INTERVAL '1 YEAR';
+SELECT EXTRACT(YEAR FROM NOW());
+SELECT EXTRACT(MONTH FROM NOW());
+SELECT EXTRACT(DAY FROM NOW());
+SELECT EXTRACT(DOW FROM NOW());
+SELECT firstname, AGE(NOW() - date_of_birth) AS age from users;
+SELECT email, COUNT(*) FROM mock_data GROUP BY email HAVING COUNT(*) > 1;
+INSERT INTO mock_data(id, first_name, email, date_of_birth) VALUES(2, 'jake', 'jake@.com', DATE '2001-09-02') ON CONFLICT(id) DO NOTHING;
+INSERT INTO mock_data(id, first_name, email, date_of_birth) VALUES(2, 'jake', 'jake@.com', DATE '2001-09-02') ON CONFLICT(id) DO UPDATE SET email = EXCLUDED.email;
+-- UPSERT = UPDATE AND INSERT
+SELECT * FROM mock_data INNER JOIN bicycle ON mock_data.bicycle_id = bicycle.id;
+SELECT * FROM mock_data LEFT OUTER JOIN bicycle ON mock_data.bicycle_id = bicycle.id WHERE bicycle_id IS NOT NULL;
+SELECT * FROM mock_data RIGHT OUTER JOIN bicycle ON mock_data.bicycle_id = bicycle.id WHERE bicycle_id IS NOT NULL;
+SELECT * FROM mock_data FULL OUTER JOIN bicycle ON mock_data.bicycle_id = bicycle.id WHERE bicycle_id IS NOT NULL;
+\copy (SELECT * FROM mock_data LEFT OUTER JOIN bicycle ON mock_data.bicycle_id = bicycle.id WHERE bicycle_id IS NOT NULL) /home/ruslan/Documents/projects/sql/templates/DUMP delimiter ', ' CSV HEADER;
