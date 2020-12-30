@@ -59,6 +59,33 @@ FROM film
 ORDER BY title;
 
 SELECT
+    ROUND(AVG(length), 2) avg_length
+FROM
+    film
+GROUP BY
+    rating
+ORDER BY
+    avg_length DESC;
+
+SELECT
+    film_id,
+    title,
+    length
+FROM
+    film
+WHERE
+    length > ALL (
+            SELECT
+                ROUND(AVG (length),2)
+            FROM
+                film
+            GROUP BY
+                rating
+    )
+ORDER BY
+    length;
+
+SELECT
        SUM(CASE rating
              WHEN 'P' THEN 1
 		     ELSE 0
@@ -92,3 +119,32 @@ SELECT
 		     ELSE 0
 		   END) "Genevois"
 FROM film;
+
+CREATE TABLE person(id INT, first_name VARCHAR(98), last_name VARCHAR(344));
+
+SELECT
+	concat_ws (
+		', ',
+		LOWER (last_name),
+		LOWER (first_name)
+	) as name
+FROM
+	customer
+ORDER BY last_name;
+
+SELECT
+	CONCAT (
+		UPPER (first_name),
+		UPPER (last_name)
+	) as full_name
+FROM
+	staff;
+
+SELECT
+	INITCAP(
+		CONCAT (first_name, ' ', last_name)
+	) AS full_name
+FROM
+	person
+ORDER BY
+	first_name;
