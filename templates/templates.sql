@@ -148,3 +148,89 @@ FROM
 	person
 ORDER BY
 	first_name;
+
+SELECT name,
+      CASE WHEN age < 30 THEN age * 10
+           WHEN age = 23 THEN age * 90
+           ELSE age
+      END result
+      FROM users;
+
+SELECT title, amount, price, ROUND(
+      CASE WHEN amount < 4 THEN price * 0.5
+           WHEN amount < 11 THEN price * 0.7
+           ELSE price * 0.9
+      END) sale, CASE WHEN amount < 4 THEN 'discont is 50%'
+                      WHEN amount < 11 THEN 'discont is 70%'
+                      ELSE 'discont is 80%'
+                 END your_discont
+                 FROM book;
+
+SELECT DISTINCT author FROM book ;
+SELECT author FROM book GROUP BY author;
+
+SELECT author,
+       MIN(price) AS min_price,
+       MAX(price) AS max_price
+FROM book
+     WHERE author <> 'new author'
+     GROUP BY author
+     HAVING (SUM(price * amount) > 5000 AND SUM(amount) > 10)
+     ORDER BY min_price DESC;
+
+SELECT * FROM book WHERE price = (SELECT MIN(price) FROM book);
+SELECT * FROM book WHERE ABS(amount - (SELECT AVG(amount) FROM book)) > 3;
+SELECT *,
+        FLOOR((SELECT AVG(amount) FROM book)) AS floor_avg_amount FROM book WHERE ABS(amount - AVG(amount)) > 3;
+SELECT * FROM book WHERE author IN (SELECT author FROM book GROUP BY author HAVING SUM(amount) >= 12);
+SELECT * FROM book WHERE author = ANY(SELECT author FROM book GROUP BY author HAVING SUM(amount) >= 12);
+
+INSERT INTO book(title, author, price, amount)
+       SELECT title, author, price, amount FROM supply WHERE title NOT IN
+              (SELECT title FROM book);
+UPDATE book, supply SET book.amount = book.amount + supply.amount WHERE book.title = supply.title AND book.author = supply.author;
+DELETE FROM supply WHERE title IN(SELECT title FROM book);
+
+CREATE TABLE ordering AS SELECT title, author, 5 AS amount FROM book WHERE amount < 4;
+SELECT * FROM ordering;
+CREATE TABLE IF NOT EXISTS ordering AS SELECT title, author,
+       (SELECT ROUND(AVG(amount)) FROM book) AS amount WHERE amount < 4;
+
+SELECT f.name, f.number_plate, f.violation,
+       CASE WHEN f.sum_fine = tv.sum_fine THEN 'standart fine'
+            WHEN f.sum_fine < tv.sum_fine THEN 'less fine'
+            ELSE 'fine is more than standart'
+        END description
+        FROM fine f, traffic_violation tv WHERE tv.violation = f.violation AND f.sum_fine IS NOT NULL;
+
+UPDATE fine, (SELECT ...) query_in
+       SET ...
+       WHERE ...;
+
+CREATE TABLE query_in ...;
+UPDATE fine, query_in ...
+       SET ...
+       WHERE ...;
+
+CREATE TABLE author(id INT, author_name VARCHAR(255));
+CREATE TABLE genre(id INT, genre_name VARCHAR(255));
+ALTER TABLE author ADD PRIMARY KEY(id);
+ALTER TABLE genre ADD PRIMARY KEY(id);
+CREATE TABLE book(id INT PRIMARY KEY, title VARCHAR(255), genre_id INT REFERENCES genre, author_id INT REFERENCES author, price INT, amount INT);
+SELECT title, author_name, genre_name FROM author
+       INNER JOIN book ON author.id = book.author_id
+       INNER JOIN genre ON genre.id = book.genre_id WHERE book.amount > 8;
+SELECT author_name, title FROM author LEFT OUTER JOIN book ON book.author_id = author.id ORDER BY author_name;
+SELECT author_name, genre_name FROM author CROSS JOIN genre;
+SELECT author_name, genre_name FROM author, genre;
+SELECT title, author_name, genre_name, price, amount FROM author
+       INNER JOIN book ON book.author_id = author.id
+       INNER JOIN genre ON genre.id = book.genre_id WHERE price BETWEEN 500 AND 700;
+SELECT author_name, SUM(amount) AS general_amount FROM author
+       INNER JOIN book ON author.id = book.author_id GROUP BY author_name HAVING SUM(amount) =
+                       (SELECT MAX(general_amount) AS max_sum_amount FROM
+                              (SELECT author_id, SUM(amount) AS sum_amount FROM book GROUP BY author_id) query_in);
+SELECT title, author_name author.author_id FROM author
+       INNER JOIN book ON author.author_id = book.author_id;
+SELECT title, author_name, author_id FROM author
+       INNER JOIN book USING(author_id);
