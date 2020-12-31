@@ -212,6 +212,12 @@ UPDATE fine, query_in ...
        SET ...
        WHERE ...;
 
+UPDATE table_name ...
+       JOIN table2 ON ...
+       ...
+       SET ...
+       WHERE ...;
+
 CREATE TABLE author(id INT, author_name VARCHAR(255));
 CREATE TABLE genre(id INT, genre_name VARCHAR(255));
 ALTER TABLE author ADD PRIMARY KEY(id);
@@ -234,3 +240,7 @@ SELECT title, author_name author.author_id FROM author
        INNER JOIN book ON author.author_id = book.author_id;
 SELECT title, author_name, author_id FROM author
        INNER JOIN book USING(author_id);
+UPDATE book SET genre_id = (SELECT genre_id
+                            FROM genre
+                            WHERE genre_name = 'new one')
+            WHERE book_id = 9;                
