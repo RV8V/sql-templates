@@ -1,4 +1,4 @@
-==============================        ==============================
+==============================              ==============================
 dump:
 cat templates/initial.sql             | mysql --user root --password;
 
@@ -9,6 +9,16 @@ echo "SHOW DATABASEs;"                | mysql -u root -p shop;
 echo "DESCRIBE shop.people;"          | mysql -u root -p shop;
 echo "SHOW CREATE TABLE shop.people;" | mysql -u root -p shop;
 echo "DELETE FROM test;"              | mysql -u root -p shop;
+
+==============================   stepik     ==============================
+mysql -u root -p
+show databases;
+create database stepik;
+use stepik;
+show warnings;
+create table book(book_id int primary key auto_increment, title varchar(50), author varchar(30), price decimal(8, 2), amount int);
+show tables;
+describe book;
 
 ==============================
 postgres:
