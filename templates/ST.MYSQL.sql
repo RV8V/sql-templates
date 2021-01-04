@@ -778,3 +778,305 @@ HAVING
                 HAVING
                       COUNT(name) > 3
                 );
+
+-- В этом уроке на каждом шаге используется таблица,  в которой представлена информация о начисленных водителям штрафах за нарушения правил дорожного движения (ПДД). С помощью запросов корректировки необходимо выполнить следующие действия:
+-- Прошло решение с типом DATETIME и DATE. Что предпочти́тельнее использовать?
+--  как следует из названия, они используются для хранения разных данных - даты и даты со временем http://www.mysql.ru/docs/man/DATETIME.html
+
+CREATE TABLE fine(fine_id INT PRIMARY KEY AUTO_INCREMENT, # ключевой столбец целого типа с автоматическим увеличением значения ключа на 1
+                  name VARCHAR(30),        # строка длиной 30
+                  number_plate VARCHAR(6), # строка длиной 6
+                  violation VARCHAR(50),   # строка длиной 50
+                  sum_fine DECIMAL(8, 2),  # вещественное число, максимальная длина 8, количество знаков после запятой 2
+                  date_violation DATE,     # дата
+                  date_payment DATE)       # дата
+
+INSERT INTO fine(name, number_plate, violation, sum_fine, date_violation, date_payment)
+       VALUES
+                 ('Баранов П.Е.', 'Р523ВТ', 'Превышение скорости(от 40 до 60)', null, '2020-02-14 ', null),
+                 ('Абрамова К.А.', 'О111АВ', 'Проезд на запрещающий сигнал', null, '2020-02-23', null),
+                 ('Яковлев Г.Р.', 'Т330ТТ', 'Проезд на запрещающий сигнал', null, '2020-03-03', null)
+
+UPDATE fine f, traffic_violation tv
+       WHERE f.violation = tv.violation;
+UPDATE fine AS f, traffic_violation AS tv
+       WHERE f.violation = tv.violation;
+
+-- Для тех, кто уже оплатил штраф, вывести информацию о том, изменялась ли стандартная сумма штрафа.
+
+SELECT f.name, f.number_plate, f.violation,
+       if(f.sum_fine = tv.sum_fine, 'standart amount of fine',
+          if(f.sum_fine < tv.sum_fine, 'descreased amount of fine',
+             'increased amount of fine')) AS description
+FROM fine f, traffic_violation tv
+WHERE f.violation = tv.violation AND f,sum_fine IS NOT NULL:
+
+-- Сформированная на предыдущих шагах таблица fine имеет вид (без ключевого столбца):
+
+-- +---------------+--------------+----------------------------------+----------+------------------+--------------+
+-- | name          | number_plate | violation                        | sum_fine | date_violation   | date_payment |
+-- +---------------+--------------+----------------------------------+----------+------------------+--------------+
+-- | Баранов П.Е.  | Р523ВТ       | Превышение скорости(от 40 до 60) | 500.00   | 2020-01-12       | 2020-01-17   |
+-- | Абрамова К.А. | О111АВ       | Проезд на запрещающий сигнал     | 1000.00  | 2020-01-14       | 2020-02-27   |
+-- | Яковлев Г.Р.  | Т330ТТ       | Превышение скорости(от 20 до 40) | 500.00   | 2020-01-23       | 2020-02-23   |
+-- | Яковлев Г.Р.  | М701АА       | Превышение скорости(от 20 до 40) | None     | 2020-01-12       | None         |
+-- | Колесов С.П.  | К892АХ       | Превышение скорости(от 20 до 40) | None     | 2020-02-01       | None         |
+-- | Баранов П.Е.  | Р523ВТ       | Превышение скорости(от 40 до 60) | None     | 2020-02-14       | None         |
+-- | Абрамова К.А. | О111АВ       | Проезд на запрещающий сигнал     | None     | 2020-02-23       | None         |
+-- | Яковлев Г.Р.  | Т330ТТ       | Проезд на запрещающий сигнал     | None     | 2020-03-03       | None         |
+-- +---------------+--------------+----------------------------------+----------+------------------+--------------+
+-- Занести в таблицу fine суммы штрафов, которые должен оплатить водитель, в соответствии с данными из таблицы traffic_violation. При этом суммы заносить только в пустые поля столбца  sum_fine.
+
+UPDATE fine f, traffic_violation tv SET f.sum_fine = tv.sum_fine
+WHERE f.violation = tv.violation && f.sum_fine IS NULL;
+
+UPDATE fine f SET f.sum_fine = if(f.sum_fine IS NULL,
+                                                    (SELECT sum_fine FROM traffic_violation WHERE f.violation = tv.violation), f.sum_fine);
+-- после IF в SQL идут не действия как в языках программирования, а возвращаются значения.
+
+-- Я правильно понимаю, что проверка этого условия требует квадратичного количества операций?
+-- Да, это так. Каждая строка первой таблицы соединяется с каждой строкой второй. В следующем модуле - подробно о способах соединения таблиц.
+-- (когда части разныз таблиц совпадают - одинаковые -> cross join)
+
+UPDATE fine f SET f.sum_fine = if(f.sum_fine IS NULL,
+                                                    (SELECT sum_fine FROM traffic_violation WHERE tv.violation = f.violation), f.sum_fine);
+UPDATE fine f SET f.sum_fine =
+                              (SELECT sum_fine FROM traffic_violation WHERE traffic_violation.sum_fine = fine.sum_fine)
+WHERE f.sum_fine IS NULL;
+
+UPDATE
+      fine AS f
+      JOIN traffic_violation AS tv ON tv.violation = f.violation
+SET
+    f.sum_fine = tv.sum_fine
+WHERE f.sum_fine IS NULL;
+
+UPDATE fine f
+      SET f.sum_fine = if(f.sum_fine IS NULL,
+                           if(f.violation IN(SELECT violation FROM traffic_violation),
+                               (SELECT sum_fine FROM traffic_violation WHERE violation = fine.violation),
+                                   sum_fine),
+                               sum_fine);
+
+-- Вывести фамилию, номер машины и нарушение только для тех водителей, которые на одной машине нарушили одно и то же правило   два и более раз.
+-- Информацию отсортировать в алфавитном порядке, сначала по фамилию водителя, потом по номеру машины и, наконец, по нарушению.
+
+SELECT name, number_plate, violation
+FROM fine
+GROUP BY name, number_plate, violation
+HAVING COUNT(violation) > 1
+       OR COUNT(name)>1) AND (cOUNT(number_plate) > 1;
+
+SELECT name, number_plate, violation
+FROM fine
+WHERE date_payment IS NULL
+      AND (name, number_plate, violation) IN
+          (SELECT name, number_plate, violation
+           FROM fine
+           WHERE date_payment IS NOT NULL
+           GROUP BY name, number_plate, violation);
+
+SELECT name, number_plate, violation
+FROM fine
+WHERE name IN(SELECT name
+              FROM fine
+              GROUP BY name, number_plate, violation
+              HAVING COUNT(number_plate) > 1
+                     AND COUNT(violation) > 1)
+                     AND date_payment IS NULL
+                     OR COUNT(name) >=2
+                        AND COUNT(number_plate) >= 2
+                        AND COUNT(violation) >= 2;
+
+-- Группируем по трем полям, что бы выбрать уникальные комбинации и добавляем условие что бы из количество было >=2!
+
+SELECT DISTINCT name, number_plate, violation
+FROM fine, (SELECT name, number_plate, violation
+            FROM fine
+            GROUP BY name, number_plate, violation
+            HAVING COUNT(*) > 1) AS t
+WHERE name = t.name;
+
+SELECT name,number_plate, violation FROM fine
+WHERE date_payment IS NULL AND (name,number_plate, violation) IN
+(
+
+SELECT name,number_plate, violation FROM fine
+                         GROUP BY name, number_plate, violation
+                         HAVING COUNT(violation) > 1
+);
+
+SELECT name,number_plate,violation FROM fine WHERE
+ISNULL(date_payment) && (name,number_plate,violation) IN (SELECT name,number_plate,violation FROM fine
+                                                GROUP BY name,number_plate,violation
+                                                HAVING COUNT(name) > 1 AND COUNT(number_plate) > 1);
+
+UPDATE fine, (SELECT ...) query_in
+SET ...
+WHERE ...;
+
+-- Увеличить в два раза сумму неоплаченных штрафов для отобранных на предыдущем шаге записей.
+
+UPDATE fine, (SELECT name,
+                     number_plate,
+                     violation
+              FROM fine
+              GROUP BY name, number_plate, violation
+              HAVING COUNT(number_plate) > 1) AS query_in
+SET fine.sum_fine = fine.sum_fine * 2
+WHERE fine.date_payment IS NULL AND fine.name = query_in.name;
+
+CREATE TABLE query_in AS SELECT name,
+                                number_plate,
+                                violation
+FROM fine
+GROUP BY name,
+         number_plate,
+         violation
+HAVING COUNT(name) > 1
+       AND COUNT(number_plate) > 1
+       AND COUNT(violation) > 1;
+UPDATE fine AS f, query_in AS qi SET f.sum_fine = f.sum_fine * 2
+WHERE f.date_payment IS Null
+      AND f.name = qi.name;
+
+UPDATE  fine, (...) query_in
+SET sum_fine = ...
+WHERE name в таблице fine и в звапрсе query_in должны совпадать И
+      number_plateв таблице fine и в звапрсе query_in должны совпадать И
+      violation в таблице fine и в звапрсе query_in должны совпадать И
+      date_payment должна быть пустой;
+
+      UPDATE
+          fine f,
+          (SELECT name, number_plate, violation
+          FROM fine
+          GROUP BY name, number_plate, violation
+          HAVING COUNT(*) > 1) q_in
+      SET f.sum_fine = f.sum_fine * 2
+      WHERE
+          (f.name, f.number_plate, f.violation) =
+          (q_in.name, q_in.number_plate, q_in.violation) AND
+          f.date_payment IS Null;
+
+UPDATE fine
+SET sum_fine = sum_fine * 2
+WHERE date_payment IS NULL AND (name, number_plate, violation) IN
+      (SELECT * FROM (SELECT name, number_plate, violation
+                      FROM fine
+                      GROUP BY name, number_plate, violation
+                      HAVING COUNT(number_plate) > 1) AS T);
+
+UPDATE fine SET sum_fine=sum_fine*2
+WHERE date_payment IS NULL AND name IN(SELECT name FROM
+                                       (SELECT name FROM fine GROUP BY name,number_plate,violation
+                                        HAVING COUNT(number_plate)>1 AND COUNT(violation)>1) as q);
+
+UPDATE fine, (
+	SELECT name, number_plate, violation
+	FROM fine
+	WHERE date_payment IS NOT NULL
+        AND (number_plate, violation) = ANY(SELECT number_plate, violation
+                                            FROM fine
+                                            GROUP BY number_plate, violation
+                                            HAVING COUNT(number_plate) > 1 AND COUNT(violation) > 1);
+) q
+SET sum_fine = sum_fine * 2
+WHERE date_payment IS NULL
+AND (fine.name, fine.number_plate, fine.violation) = (q.name, q.number_plate, q.violation);
+
+UPDATE fine AS f
+            JOIN
+                (SELECT name, number_plate, violation
+                 FROM fine
+                 GROUP BY name, number_plate, violation
+                 HAVING count(*) >= 2) AS f2
+            ON f.name = f2.name
+               AND f.number_plate = f2.number_plate
+               AND f.violation = f2.violation
+SET f.sum_fine = f.sum_fine * 2
+WHERE f.date_payment IS NULL;
+
+WITH Temp AS (SELECT name, number_plate, violation
+FROM fine AS f
+GROUP BY name, number_plate, violation
+HAVING COUNT(number_plate) > 1)
+
+UPDATE fine, (SELECT DISTINCT f.name, f.number_plate, f.violation FROM fine f,
+                  (SELECT name, number_plate, violation, count(*)
+                   FROM fine
+                   GROUP BY name, number_plate, violation
+                   HAVING count(*) > 1) t
+                   WHERE f.name = t.name) query_in
+SET fine.sum_fine = fine.sum_fine * 2
+WHERE fine.name = query_in.name
+AND fine.date_payment IS NULL
+
+CREATE table query_in (SELECT name,number_plate,violation FROM fine WHERE
+                       ISNULL(date_payment) AND (name,number_plate,violation) IN
+                       (SELECT name,number_plate,violation FROM fine
+                       GROUP BY name,number_plate,violation
+                       HAVING COUNT(name)>1 AND COUNT(number_plate)>1));
+UPDATE fine AS f, query_in AS q SET f.sum_fine = f.sum_fine * 2 WHERE
+(f.name = q.name AND f.number_plate = q.number_plate AND f.violation = q.violation) AND ISNULL(date_payment);
+
+TRUNCATE TABLE fine;
+#UPDATE
+INSERT INTO fine(name,number_plate,violatation,sum_fine,date_violatation,date_payment)
+VALUES
+      ('Баранов П.Е.','Р523ВТ','Превышение скорости(от 40 до 60)',500.00,'2020-01-12','2020-01-17'),
+      ('Абрамова К.А.','О111АВ','Проезд на запрещающий сигнал',1000.00,'2020-01-14','2020-02-27'),
+      ('Яковлев Г.Р.','Т330ТТ','Превышение скорости(от 20 до 40)',500.00,'2020-01-23','2020-02-23'),
+      ('Яковлев Г.Р.','М701АА','Превышение скорости(от 20 до 40)',500.00,'2020-01-12',null),
+      ('Колесов С.П.','К892АХ','Превышение скорости(от 20 до 40)',500.00,'2020-02-01',null),
+      ('Баранов П.Е.','Р523ВТ','Превышение скорости(от 40 до 60)',2000.00,'2020-02-14',null),
+      ('Абрамова К.А.','О111АВ','Проезд на запрещающий сигнал',2000.00,'2020-02-23',null),
+      ('Яковлев Г.Р.','Т330ТТ','Проезд на запрещающий сигнал',1000.00,'2020-03-03',null);
+
+-- Необходимо в таблицу fine занести дату оплаты соответствующего штрафа из таблицы payment и уменьшить начисленный штраф в
+-- таблице fine в два раза (только для новых штрафов, дата оплаты которых занесена в payment) , если оплата произведена не более, чем за 20 дней со дня нарушения.
+
+UPDATE fine, payment SET fine.date_payment = payment.date_payment
+                         fine.sum_fine = if(DATEDIFF(payment.date_payment, fine.violatation) - 1 <= 20, fine.sum_fine / 2, fine.sum_fine)
+WHERE fine.number_plate = payment.number_plate AND payment.date_payment IS NULL;
+
+UPDATE fine f, payment p
+SET f.date_payment = p.date_payment,
+    f.sum_fine = f.sum_fine * IF(
+        DATEDIFF(p.date_payment, p.date_violation) < 21, 0.5, 1
+    )
+WHERE f.date_payment IS NULL AND f.date_violation = p.date_violation;
+
+UPDATE fine, payment SET fine.sum_fine = CASE WHEN ABS(DATEDIFF(fine.violation, payment.date_payment)) < 21
+                                              THEN fine.sum_fine * 0.5
+                                              ELSE fine.sum_fine
+                                              END,
+                         fine.date_payment = payment.date_payment
+WHERE fine.name = payment.name && fine.date_payment IS NULL;
+
+UPDATE fine AS f
+SET f.date_payment = IF(f.date_payment IS NULL,
+                      (SELECT t.date_payment
+                      FROM payment AS t
+                      WHERE f.name=t.name AND
+                      f.number_plate = t.number_plate AND
+                      f.violation = t.violation),
+                      f.date_payment);
+UPDATE fine AS f, payment AS t
+SET f.sum_fine = IF(DATEDIFF(f.date_payment,f.date_violation)<20,
+                    f.sum_fine / 2,
+                    f.sum_fine)
+            WHERE f.name = t.name AND
+            f.number_plate = t.number_plate AND
+            f.violation = t.violation anANDd
+            f.date_violation = t.date_violation;
+
+UPDATE fine,
+    (SELECT
+      payment_id, name, number_plate, violation, date_violation, date_payment
+         FROM payment) query_in
+SET sum_fine = IF(DateDiff(query_in.date_payment, query_in.date_violation) + 1 <= 20 , sum_fine / 2, sum_fine),                 fine.date_payment = query_in.date_payment
+WHERE fine.violation = query_in.violation
+      AND fine.number_plate = query_in.number_plate
+          AND fine.date_violation = query_in.date_violation
+              AND  fine.name = query_in.name;
