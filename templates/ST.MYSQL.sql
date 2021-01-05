@@ -1080,3 +1080,10 @@ WHERE fine.violation = query_in.violation
       AND fine.number_plate = query_in.number_plate
           AND fine.date_violation = query_in.date_violation
               AND  fine.name = query_in.name;
+
+-- Создать новую таблицу back_payment, куда внести информацию о неоплаченных штрафах (Фамилию и инициалы водителя, номер машины, нарушение, сумму штрафа  и  дату нарушения) из таблицы fine.
+
+CREATE TABLE back_payment AS SELECT name, number_plate, violation, date_payment FROM fine WHERE date_payment IS NULL;
+
+CREATE TABLE back_payment(SELECT * FROM fine WHERE ISNULL(date_payment));
+ALTER TABLE back_payment DROP fine_id, DROP date_payment;
