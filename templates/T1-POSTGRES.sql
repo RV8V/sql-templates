@@ -126,7 +126,124 @@ BEGIN
      return i;
 END $$ LANGUAGE plpgsql VOLATILE;
 COMMENT ON FUNCTION PUBLIC.fibonaci(IN INTEGER) IS 'returns fibonaci value';
-
 ALTER FUNCTION PUBLIC.fibonaci(INTEGER) OWNER TO postgres;
 
-SELECT total(), inc(), _sum();
+CREATE FUNCTION PUBLIC._loop(INOUT n INTEGER)
+RETURNS INTEGER AS $$
+DECLARE counter INTEGER = 0;
+BEGIN LOOP EXIT WHEN counter = n;
+      counter = counter + 1;
+      RAISE NOTICE 'hello, world';
+      END LOOP;
+      return n;
+END $$ LANGUAGE plpgsql;
+COMMENT ON FUNCTION PUBLIC._loop(INOUT INTEGER) IS 'returns input value';
+
+CREATE OR REPLACE FUNCTION PUBLIC.while_fib(IN n INTEGER)
+RETURNS INTEGER AS $PUBLIC.while_fib$
+DECLARE counter INTEGER = 0;
+        i INTEGER = 0;
+        j INTEGER = 1;
+BEGIN
+        IF(n < 1) THEN return 0;
+        END IF;
+
+        while counter < n LOOP
+        counter = counter + 1;
+        SELECT j, i + 1 INTO i, j;
+        END LOOP
+        return i;
+END $PUBLIC.while_fib$ LANGUAGE plpgsql IMMUTABLE LEAKRPOOF;
+COMMENT ON FUNCTION PUBLIC.while_fib(IN INTEGER) IS 'returns fibonaci value';
+ALTER FUNCTION PUBLIC.while_fib(INTEGER) OWNER TO postgres;
+
+CREATE OR REPLACE FUNCTION PUBLIC.fetcher(IN n INTEGER)
+RETURNS VOID AS $$
+DECLARE _table RECORD;
+BEGIN for _table IN SELECT name FROM person ORDER BY name LIMIT n
+      LOOP RAISE NOTICE '%', _table.name;
+      END LOOP;
+END $$ LANGUAGE plpgsql;
+COMMENT ON FUNCTION PUBLIC.fetcher(IN INTEGER) IS 'returns records from table person';
+
+SELECT PUBLIC.total(), PUBLIC.inc(), PUBLIC._sum(), PUBLIC.fibonaci(2), PUBLIC.while_fib(3);
+
+BEGIN;
+CREATE TABLE IF NOT EXISTS test(n INTEGER);
+INSERT INTO test VALUES(1);
+END transaction;
+
+BEGIN;
+DELETE FROM test;
+DROP TABLE IF EXISTS test;
+ROLLBACK;
+
+BEGIN;
+CREATE TABLE IF NOT EXISTS my_table(n INTEGER);
+INSERT INTO my_table VALUES(1);
+SAVEPOINT my_savepoint;
+INSERT INTO my_table VALUES(2);
+INSERT INTO my_table VALUES(3);
+SELECT * from my_table;
+ROLLBACK TO my_savepoint;
+SELECT * from my_table;
+COMMIT;
+
+BEGIN TRANSACTION WRITE ONLY ISOLATION LEVEL SERIALIZABLE;
+CREATE TABLE IF NOT EXISTS _test(n INTEGER);
+SELECT * FROM does_not_exists_table;
+SELECT "hello, world";
+ROLLBACK TRANSACTION;
+
+BEGIN TRANSACTION READ ONLY ISOLATION LEVEL READ COMMITTED;
+CREATE TABLE IF NOT EXISTS _test(n INTEGER);
+INSERT INTO _test VALUES(1);
+SAVEPOINT my_point;
+INSERT INTO my_table VALUES(2);
+INSERT INTO my_table VALUES(3);
+INSERT INTO does_not_exists_table VALUES(1);
+INSERT INTO my_table VALUES(4);
+ROLLBACK TO my_point;
+SELECT * FROM my_table;
+COMMIT TRANSACTION;
+
+CREATE TABLE IF NOT EXISTS _user
+(
+    "name" TEXT
+);
+
+CREATE TABLE IF NOT EXISTS _log
+(
+    "_text" TEXT,
+    "added" TIMESTAMP WITHOUT TIME ZONE
+);
+
+CREATE OR REPLACE FUNCTION PUBLIC.add_to_log() RETURNS TRIGGER AS $PUBLIC.add_to_log$
+DECLARE
+    mstr   VARCHAR(30);
+    astr   VARCHAR(100);
+    retstr VARCHAR(254);
+BEGIN
+    IF    TG_OP = 'INSERT' THEN
+        astr := NEW.name;
+        mstr := 'Add new user ';
+        retstr := mstr || astr;
+        INSERT INTO _log(_text, added) VALUES(retstr, NOW());
+        RETURN NEW;
+    ELSIF TG_OP = 'UPDATE' THEN
+        astr := NEW.name;
+        mstr := 'Update user ';
+        retstr := mstr || astr;
+        INSERT INTO _log(_text, added) VALUES(retstr, NOW());
+        RETURN NEW;
+    ELSIF TG_OP = 'DELETE' THEN
+        astr = OLD.name;
+        mstr := 'Remove user ';
+        retstr := mstr || astr;
+        INSERT INTO _log(_text, added) VALUES(retstr, NOW());
+        RETURN OLD;
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER t_user AFTER INSERT OR UPDATE OR DELETE ON _user FOR EACH ROW EXECUTE PROCEDURE add_to_log();
